@@ -1,7 +1,8 @@
-import { actividadMesas } from "@/pages/mesas";
+import { actividadMesas } from "@/components/utils";
+
 
 export default async function handler(req, res) {
-  const { mesa, user } = req.query;
+  const { mesa, user, } = req.query;
 
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Método no permitido" });
@@ -9,6 +10,11 @@ export default async function handler(req, res) {
 
   if (!mesa || !user) {
     return res.status(400).json({ error: "Faltan parámetros: mesa y user" });
+  }
+
+  if (req.query?.delete){
+    delete actividadMesas[mesa];
+    return res.status(200).json({ status: "ok", mensaje: "Mesa desocupada" });
   }
 
   actividadMesas[mesa] = {

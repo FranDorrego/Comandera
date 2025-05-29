@@ -1,6 +1,5 @@
-export const actividadMesas = {
-  // Ejemplo: "1": { time: "2025-05-24T20:32:00Z", mesero: "Juan" }
-};
+import { actividadMesas } from "@/components/utils";
+
 
 export default async function handler(req, res) {
   const url = process.env.link_base || "http://localhost:3001";
@@ -11,7 +10,7 @@ export default async function handler(req, res) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: "SELECT TOP 50 mes_cod FROM mesas WHERE mes_tip='M' ORDER BY mes_cod",
+        query: "SELECT TOP 50 * FROM mesas WHERE mes_tip='M' ORDER BY VAL(mes_cod)",
       }),
     });
     const mesasData = await mesasRes.json();

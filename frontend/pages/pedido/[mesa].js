@@ -11,7 +11,7 @@ export default function Pedido() {
   const { mesa } = router.query;
   const [carrito, setCarrito] = useState({});
   const [carritoVisible, setCarritoVisible] = useState(false);
-  var mesero_actual = Cookies.get("mesero_actual");
+  const [mesero_actual, setMesero_actual] = useState(Cookies.get("mesero_actual"));
 
   // Observa visibilidad del carrito
   useEffect(() => {
@@ -26,7 +26,9 @@ export default function Pedido() {
     if (!mesero_actual) {
       router.push("/");
     }
+    setMesero_actual(JSON.parse(mesero_actual));
   }, []);
+
 
   const handleAdd = (producto, obs) => {
     const key = `${producto.id}-${producto.nombre}-${producto.precio}-${obs || ''}`;
@@ -35,20 +37,27 @@ export default function Pedido() {
       if (!nuevo[key]) {
         nuevo[key] = { producto: producto, cantidad: 1, obs };
       } else {
-        nuevo[key].cantidad += 0.5;
+        nuevo[key].cantidad += 1;
       }
       return nuevo;
     });
+
+    // notificar online...
+    fetch(`/api/pedido/online?mesa=${mesa}&user=${mesero_actual?.me_des}`)
   };
+
+
 
   const handleRemove = key => {
     setCarrito(prev => {
       const next = { ...prev };
-      if (next[key].cantidad > 1) next[key].cantidad -= 0.5;
+      if (next[key].cantidad > 1) next[key].cantidad -= 1;
       else delete next[key];
       return next;
     });
+
     // notificar online...
+    fetch(`/api/pedido/online?mesa=${mesa}&user=${mesero_actual?.me_des}`)
   };
 
   const handleSubmit = async () => {
@@ -59,16 +68,30 @@ export default function Pedido() {
       observacion: i.observacion,
       total: i.cantidad * i.producto.precio,
     }));
-    const pedido = { mesa, mesero_actual, items, total: items.reduce((s, i) => s + i.total, 0) };
-    await fetch('/api/pedido', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pedido) });
-    router.push('/mesas');
+    const pedido = { mesa, mesero: { ...mesero_actual }, items, total: items.reduce((s, i) => s + i.total, 0) };
+    const res = await fetch('/api/pedido', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pedido) });
+    if (!res.ok) {
+      const error = await res.json();
+      alert(`Error al enviar el pedido: ${error.error} Reintnta enviar.`);
+      return;
+    }
+    else {
+      router.push('/mesas');
+    }
+
+    // notificar online...
+    fetch(`/api/pedido/online?mesa=${mesa}&user=${mesero_actual?.me_des}&delete=true`)
   };
 
   return (
     <>
       <div className={styles.container}>
         <div>
-          <button onClick={() => router.push("/mesas")} className={styles.volver}>
+          <div className={styles.name}>{mesero_actual?.me_des}</div>
+          <button onClick={() => {
+            fetch(`/api/pedido/online?mesa=${mesa}&user=${mesero_actual?.me_des}&delete=true`);
+            router.push("/mesas")
+          }} className={styles.volver}>
             ⬅ Volver
           </button>
           <h2 className={styles.titulo}>Mesa {mesa}</h2>

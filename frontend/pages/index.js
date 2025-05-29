@@ -25,7 +25,7 @@ export default function Home() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ idMesero, clave }),
     });
-
+    console.log("Ingresando directo como:", { idMesero, clave });
     if (res.ok) {
       const result = await res.json();
       const nuevosMeseros = [...meseros.filter(m => m.id !== idMesero), { ...result?.mesero  }];
@@ -39,6 +39,7 @@ export default function Home() {
 
   const ingresarDirecto = async (perfil) => {
     setError("");
+    
     const res = await fetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -50,7 +51,7 @@ export default function Home() {
       Cookies.set("mesero_actual", JSON.stringify({ ...result?.mesero }), { expires: 1 / 2, });
       router.push("/mesas");
     } else {
-      setError(`Error al iniciar sesión como ${perfil.id}`);
+      setError(`Error al iniciar sesión como ${perfil.me_des}`);
     }
   };
 

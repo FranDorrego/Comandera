@@ -5,3 +5,6 @@ export function formatearMiles(numero) {
     return numero;
   }
 }
+
+
+export const actividadMesas = {};

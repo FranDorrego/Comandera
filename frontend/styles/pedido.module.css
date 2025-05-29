@@ -55,3 +55,17 @@
 .verCarrito:hover {
   background: #1b5e20;
 }
+
+.name {
+  position: absolute;
+  right: 0px;
+  background: none;
+  border: none;
+  color: #83bd86;
+  font-weight: bold;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  transition: color 0.2s ease;
+}

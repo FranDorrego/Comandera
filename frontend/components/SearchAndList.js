@@ -21,6 +21,9 @@ export default function SearchAndList({ onAdd, mesero, mesa }) {
     } else {
       setProductos([]);
     }
+
+    // notificar online...
+    fetch(`/api/pedido/online?mesa=${mesa}&user=${mesero?.me_id}`)
   };
 
   // Cargar inicial
