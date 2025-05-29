@@ -1,16 +1,50 @@
 from fastapi import FastAPI, Request, Query, HTTPException
 import win32com.client
 import pythoncom
+import os
+import json
+
 
 app = FastAPI()
 
 # Configuración
-archivo_mdb = r"./sifare.mdb"
+BASE_CONSULTAS = r"./db.mdb"
+BASE_PEDIDOS = None
 password = "mery46"
 
 
+def buscar_base_pedidos():
+    global BASE_PEDIDOS
+    if BASE_PEDIDOS is not None:
+        return BASE_PEDIDOS
+
+    directorio_actual = os.path.abspath(__file__)
+    raiz = os.path.dirname(os.path.dirname(directorio_actual)) # 2 niveles arriba
+    config_path = os.path.join(raiz, "setup", "config.json")
+
+    print(config_path, raiz, directorio_actual)
+
+    if os.path.exists(config_path):
+        with open(config_path, "r") as f:
+            data = json.load(f)
+            base_path = data.get("base_path", "")
+            if base_path:
+                BASE_PEDIDOS = base_path
+                return base_path
+    
+    return None
+
 def ejecutar_sql(query: str):
     pythoncom.CoInitialize()
+
+    # Determinar el archivo MDB a usar
+    archivo_mdb = BASE_CONSULTAS
+    if 'cocina' in query.lower():
+        base_pedidos = buscar_base_pedidos()
+        if not base_pedidos:
+            raise HTTPException(status_code=500, detail="No se encontró la base de pedidos.")
+        archivo_mdb = base_pedidos
+
     try:
         conn = win32com.client.Dispatch("ADODB.Connection")
         conn.Open(
@@ -40,6 +74,8 @@ def ejecutar_sql(query: str):
 
 def obtener_info_tablas():
     pythoncom.CoInitialize()
+    archivo_mdb = BASE_CONSULTAS
+
     try:
         conn = win32com.client.Dispatch("ADODB.Connection")
         conn.Open(
@@ -68,11 +104,9 @@ def obtener_info_tablas():
         print(f"[ERROR obtener_info_tablas] {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error obteniendo info de tablas: {str(e)}")
 
-
 def select_limitado(tabla, limit):
     query = f"SELECT TOP {limit} * FROM [{tabla}] ORDER BY id DESC"
     return ejecutar_sql(query)
-
 
 @app.post("/api/{tabla}")
 async def api_post_tabla(tabla: str, request: Request):

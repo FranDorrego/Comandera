@@ -42,3 +42,6 @@ __pycache__/
 
 # venv32
 venv32/
+Python32
+Node.js
+*.mdb

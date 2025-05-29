@@ -1,0 +1,278 @@
+import tkinter as tk
+from tkinter import filedialog
+from tkinter import scrolledtext
+import threading
+import json
+import os
+import subprocess
+import shutil
+import time
+
+from back import ejecutar_instalacion_backend
+from front import ejecutar_instalacion_frontend
+
+CONFIG_FILE = "setup/config.json"
+PYTHON_DIR = "Python32"
+NODE_DIR = "Node.js"
+BASE_DIR = None
+
+class InstaladorApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Instalador de Sistema de Comandera")
+        self.base_path = tk.StringVar()
+
+        self._crear_interfaz()
+        self._cargar_config()
+        self._verificar_estado_instalacion()
+        self.root.protocol("WM_DELETE_WINDOW", self._cerrar_aplicacion)
+
+    def _crear_interfaz(self):
+        frame_path = tk.Frame(self.root)
+        frame_path.pack(padx=10, pady=10, fill="x")
+
+        tk.Label(frame_path, text="📂 Ruta de la Base de Datos:").pack(side="left")
+        self.entry_path = tk.Entry(frame_path, textvariable=self.base_path, width=50)
+        self.entry_path.pack(side="left", padx=5)
+        tk.Button(frame_path, text="Examinar", command=self._seleccionar_archivo).pack(side="left")
+
+        frame_botones = tk.Frame(self.root)
+        frame_botones.pack(pady=(0, 10))
+
+        self.btn_iniciar = tk.Button(frame_botones, text="🚀 Iniciar Instalación", command=self._iniciar_instalacion, state="disabled")
+        self.btn_iniciar.pack(side="left", padx=5)
+
+        self.btn_start_back = tk.Button(frame_botones, text="▶ Start Back", command=self._start_backend, state="disabled")
+        self.btn_start_back.pack(side="left", padx=5)
+
+        self.btn_start_front = tk.Button(frame_botones, text="▶ Start Front", command=self._start_frontend, state="disabled")
+        self.btn_start_front.pack(side="left", padx=5)
+
+        self.btn_stop_back = tk.Button(frame_botones, text="⏹ Stop Back", command=self._stop_backend, state="disabled")
+        self.btn_stop_back.pack(side="left", padx=5)
+
+        self.btn_stop_front = tk.Button(frame_botones, text="⏹ Stop Front", command=self._stop_frontend, state="disabled")
+        self.btn_stop_front.pack(side="left", padx=5)
+
+        # Frame contenedor general
+        self.frame_logs = tk.Frame(self.root)
+        self.frame_logs.pack(padx=10, pady=10, fill="both", expand=True)
+
+        # Detectar si la instalación ya fue hecha
+        python_ok = os.path.exists(PYTHON_DIR)
+        node_ok = os.path.exists(NODE_DIR)
+
+        if not (python_ok and node_ok):
+            # Mostrar consola de instalación (solo si es necesario)
+            frame_general = tk.LabelFrame(self.frame_logs, text="Instalación")
+            frame_general.pack(fill="both", expand=True, pady=(0, 5))
+            self.log_general = scrolledtext.ScrolledText(frame_general, height=10)
+            self.log_general.pack(fill="both", expand=True)
+        else:
+            self.log_general = None  # No se muestra ni se usa
+
+        # Consola Backend
+        frame_back = tk.LabelFrame(self.frame_logs, text="Backend")
+        frame_back.pack(fill="both", expand=True, pady=(0, 5))
+        self.log_back = scrolledtext.ScrolledText(frame_back, height=10)
+        self.log_back.pack(fill="both", expand=True)
+
+        # Consola Frontend
+        frame_front = tk.LabelFrame(self.frame_logs, text="Frontend")
+        frame_front.pack(fill="both", expand=True)
+        self.log_front = scrolledtext.ScrolledText(frame_front, height=10)
+        self.log_front.pack(fill="both", expand=True)
+
+        self.proc_back = None
+        self.proc_front = None
+
+    def _crear_consola(self, parent, titulo):
+        frame = tk.LabelFrame(parent, text=titulo)
+        frame.pack(side="left", fill="both", expand=True, padx=5)
+        consola = scrolledtext.ScrolledText(frame, height=20)
+        consola.pack(fill="both", expand=True)
+        return consola
+
+    def _seleccionar_archivo(self):
+        global BASE_DIR
+
+        archivo = filedialog.askopenfilename(filetypes=[("Base de Datos Access", "*.mdb")])
+        if archivo:
+            self.base_path.set(archivo)
+            BASE_DIR = os.path.dirname(archivo)
+            self._guardar_config()
+            self._verificar_estado_instalacion()
+
+    def _guardar_config(self):
+        os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
+        with open(CONFIG_FILE, "w") as f:
+            json.dump({"base_path": self.base_path.get()}, f)
+
+    def _cargar_config(self):
+        global BASE_DIR
+
+        if os.path.exists(CONFIG_FILE):
+            with open(CONFIG_FILE, "r") as f:
+                data = json.load(f)
+                self.base_path.set(data.get("base_path", ""))
+                BASE_DIR = os.path.dirname(self.base_path.get()) if self.base_path.get() else None
+    
+    def _verificar_estado_instalacion(self):
+        python_ok = os.path.exists(PYTHON_DIR)
+        node_ok = os.path.exists(NODE_DIR)
+        base_ok = os.path.exists(self.base_path.get())
+
+        if not (python_ok and node_ok):
+            self.btn_iniciar.config(state="normal" if base_ok else "disabled")
+            self.btn_start_back.config(state="disabled")
+            self.btn_start_front.config(state="disabled")
+        else:
+            self.btn_iniciar.config(state="disabled")
+            self.btn_start_back.config(state="normal")
+            self.btn_start_front.config(state="normal")
+            self.btn_stop_back.config(state="normal")
+            self.btn_stop_front.config(state="normal")
+
+            # Si tiene todo instalado, iniciar backend y frontend automáticamente
+            if base_ok:
+                self._log(self.log_back, "Iniciando backend automáticamente...")
+                self._start_backend()
+                self._log(self.log_front, "Iniciando frontend automáticamente...")
+                self._start_frontend()
+
+    def _iniciar_instalacion(self):
+        self._log(self.log_general, "Iniciando instalación...")
+        def instalacion():
+            self._log(self.log_general, "Instalando backend...")
+            ejecutar_instalacion_backend(
+                self.base_path.get(),
+                self._log_callback(self.log_back),
+                self._log_callback(self.log_general)
+            )
+            self._log(self.log_general, "Instalación del backend completada.")
+            
+            self._log(self.log_general, "Instalando frontend...")
+            ejecutar_instalacion_frontend(
+                self._log_callback(self.log_front),
+                self._log_callback(self.log_general)
+            )
+            self._log(self.log_general, "Instalación del frontend completada.")
+            
+            self._verificar_estado_instalacion()
+        threading.Thread(target=instalacion).start()
+
+    def _start_backend(self):
+        self.btn_start_back.config(state="disabled")
+        self._log(self.log_back, "Iniciando servidor backend...")
+
+        self.proc_back = subprocess.Popen(
+            ["HostBase\\venv32\\Scripts\\uvicorn", "api:app", "--port", "3001"],
+            cwd="HostBase",
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            encoding="utf-8"
+        )
+
+        def leer_backend():
+            for linea in self.proc_back.stdout:
+                self._log(self.log_back, linea.strip())
+
+        def copia_pega_base():
+            veces = 0
+            while True:
+                veces += 1
+                try:
+                    if BASE_DIR and os.path.exists(BASE_DIR):
+                        destino = os.path.join("HostBase", "db.mdb")
+                        if veces % 5 == 0:
+                            self._log(self.log_back, f"📁 Copiando base de datos a {destino}")
+                        shutil.copy2(self.base_path.get(), destino)
+                except Exception as e:
+                    self._log(self.log_back, f"❌ Error al copiar base de datos: {e}")
+                time.sleep(5)
+
+        threading.Thread(target=copia_pega_base, daemon= True).start()
+        self.hilo_back = threading.Thread(target=leer_backend)
+        self.hilo_back.start()
+
+    def _start_frontend(self):
+        def tarea_frontend():
+            self._log(self.log_front, "🏗️ Compilando frontend (next build)...")
+
+            npm_cmd = os.path.abspath(os.path.join("Node.js", "node-v18.17.1-win-x86", "npm.cmd"))
+            if not os.path.exists(npm_cmd):
+                self._log(self.log_front, "❌ No se encontró npm.cmd. ¿Está correctamente instalado Node.js?")
+                return
+
+            # 1. Compilar
+            proceso_build = subprocess.Popen(
+                [npm_cmd, "run", "build"],
+                cwd="frontend",
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                encoding="utf-8"
+            )
+
+            for linea in proceso_build.stdout:
+                self._log(self.log_front, f"[build] {linea.strip()}")
+
+            proceso_build.wait()
+            self._log(self.log_front, "✅ Build finalizado. Iniciando servidor de producción...")
+
+            # 2. Iniciar servidor de producción
+            self.proc_front = subprocess.Popen(
+                [npm_cmd, "run", "start"],
+                cwd="frontend",
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                encoding="utf-8"
+            )
+
+            for linea in self.proc_front.stdout:
+                self._log(self.log_front, f"[serve] {linea.strip()}")
+
+        # Lanzar todo en hilo aparte
+        self.btn_start_front.config(state="disabled")
+        self.hilo_front = threading.Thread(target=tarea_frontend)
+        self.hilo_front.start()
+
+    def _stop_backend(self):
+        self.btn_start_back.config(state="normal")
+        if hasattr(self, "proc_back") and self.proc_back and self.proc_back.poll() is None:
+            self._log(self.log_back, "🛑 Deteniendo backend...")
+            self.proc_back.terminate()
+            self.proc_back.wait()
+            self._log(self.log_back, "✅ Backend detenido.")
+
+    def _stop_frontend(self):
+        self.btn_start_front.config(state="normal")
+        if hasattr(self, "proc_front") and self.proc_front and self.proc_front.poll() is None:
+            self._log(self.log_front, "🛑 Deteniendo frontend...")
+            self.proc_front.terminate()
+            self.proc_front.wait()
+            self._log(self.log_front, "✅ Frontend detenido.")
+
+
+    def _cerrar_aplicacion(self):
+        self._stop_backend()
+        self._stop_frontend()
+        self.root.destroy()
+
+    def _log(self, consola, texto):
+        try:
+            consola.insert(tk.END, texto + "\n")
+            consola.see(tk.END)
+        except Exception as e:
+            print(f"Error al escribir en la consola: {e}")
+
+    def _log_callback(self, consola):
+        return lambda texto: self._log(consola, texto)
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = InstaladorApp(root)
+    root.mainloop()
