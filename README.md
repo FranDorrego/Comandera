@@ -1,22 +1,49 @@
 # README Global – Sistema de Comandera 🍽️🧾🖥️
 
-Este proyecto está compuesto por un frontend en Next.js y un backend en Python (FastAPI) que se comunica con una base de datos Microsoft Access. A continuación se detalla cómo configurar y ejecutar el entorno completo en una máquina local.
+Este proyecto está compuesto por un frontend en Next.js y un backend en Python (FastAPI) que se comunica con una base de datos Microsoft Access. A continuación se detalla cómo configurar y ejecutar el entorno completo en una máquina local. Además, se detalla el sistema automatizado de instalación y despliegue.
 
 ---
 
 ## ✅ Requisitos Generales del Sistema
 
-🔹 Tener instalado **Node.js** para el frontend.
+🔸📦 Tener instalado **Node.js** para el frontend.
 
-🔹 Tener instalado **Python 32 bits** para el backend (necesario para conectarse a Access).
+🔸🐍 Tener instalado **Python 32 bits** para el backend (necesario para conectarse a Access).
 
-🔹 Tener una base de datos Access válida (`sifare.mdb`) ubicada en la carpeta del backend (`HostBase/`).
+🔸📁 Tener una base de datos Access válida (`sifare.mdb`) ubicada en la carpeta del backend (`HostBase/`).
 
-🔹 Tener `Microsoft.Jet.OLEDB.4.0` habilitado (solo funciona con Python de 32 bits).
+🔸🧩 Tener `Microsoft.Jet.OLEDB.4.0` habilitado (solo funciona con Python de 32 bits).
 
-🔹 Tener creada una carpeta `venv32/` con entorno virtual de Python dentro de `HostBase`.
+🔸🛠️ Tener creada una carpeta `venv32/` con entorno virtual de Python dentro de `HostBase`.
 
-🔹 Tener los archivos `run_front.bat` y `run_back.bat` para ejecución rápida.
+🔸⚙️ Tener los archivos `run_front.bat` y `run_back.bat` para ejecución rápida.
+
+---
+
+## 🖥️ Instalador Automático con Interfaz (Tkinter)
+
+Se proporciona un script que, al convertirse en binario (`.exe`), permite:
+
+🔹 Mostrar una ventana gráfica con **3 consolas embebidas**:
+
+* Consola de logs generales (instalación, clonación, descargas...)
+* Consola de backend (servidor Python/FastAPI)
+* Consola de frontend (servidor Next.js)
+
+🔹 Permitir al usuario seleccionar la **base de datos `.mdb`** mediante un input gráfico. Si no se selecciona, el botón de instalación permanece deshabilitado.
+
+🔹 Guardar las preferencias del usuario en un archivo `config.json` local. Si no existe, lo genera automáticamente en la carpeta del ejecutable.
+
+🔹 Realizar automáticamente:
+
+* Clonado del repositorio
+* Verificación e instalación de Python (32 bits)
+* Verificación e instalación de Node.js
+* Creación de entorno virtual `venv32` para el backend
+* Instalación de dependencias (backend y frontend)
+* Ejecución de servidores
+
+Toda la salida estándar de estos procesos es visible en tiempo real desde la interfaz, lo que permite observar el progreso completo.
 
 ---
 
