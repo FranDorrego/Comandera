@@ -7,10 +7,15 @@ Este proyecto está compuesto por un frontend en Next.js y un backend en Python 
 ## ✅ Requisitos Generales del Sistema
 
 🔹 Tener instalado **Node.js** para el frontend.
+
 🔹 Tener instalado **Python 32 bits** para el backend (necesario para conectarse a Access).
+
 🔹 Tener una base de datos Access válida (`sifare.mdb`) ubicada en la carpeta del backend (`HostBase/`).
+
 🔹 Tener `Microsoft.Jet.OLEDB.4.0` habilitado (solo funciona con Python de 32 bits).
+
 🔹 Tener creada una carpeta `venv32/` con entorno virtual de Python dentro de `HostBase`.
+
 🔹 Tener los archivos `run_front.bat` y `run_back.bat` para ejecución rápida.
 
 ---
