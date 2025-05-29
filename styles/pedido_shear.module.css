@@ -1,0 +1,108 @@
+.inputBuscar {
+  display: block;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  margin-bottom: 1.2rem;
+  background: #ffffff;
+  color: #333;
+  text-align: center;
+  outline: none;
+}
+
+.inputBuscar::placeholder {
+  color: #aaa;
+}
+
+.productos {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-left: 5px solid #2e7d32;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  padding: 1rem;
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: scale(1.01);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.07);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.cardHeader h4 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #2e7d32;
+  margin: 0;
+}
+
+.precio {
+  font-size: 0.9rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.observacion {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.95rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-bottom: 0.8rem;
+  background-color: #f8f8f8;
+  color: #333;
+}
+
+.card button {
+  width: 100%;
+  padding: 0.6rem;
+  background-color: #2e7d32;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.card button:hover {
+  background-color: #1b5e20;
+}
+
+.productos p {
+  font-style: italic;
+  color: #999;
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.empty {
+  text-align: center;
+  margin-top: 2rem;
+  color: #888;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.emptyIcon {
+  font-size: 3rem;
+  opacity: 0.4;
+}

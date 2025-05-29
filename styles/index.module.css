@@ -1,0 +1,106 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #f1f3f5;
+  padding: 1rem;
+}
+
+.card {
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+}
+
+.logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo img {
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+
+.loginh1 {
+  font-size: 1.4rem;
+  margin-bottom: 0.25rem;
+  color: #171717;
+}
+
+.loginp {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+
+.inputLogin {
+  width: 100%;
+  padding: 0.8rem;
+  margin-bottom: 1rem;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  background-color: #f9f9f9;
+  color: #333;
+  transition: border-color 0.3s;
+}
+
+.inputLogin:focus {
+  outline: none;
+  border-color: #0070f3;
+  background-color: #fff;
+}
+
+.loginBtn {
+  width: 100%;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 10px;
+  background: #0070f3;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.loginBtn:hover {
+  background: #0058c7;
+}
+
+.guards {
+  margin-bottom: 1rem;
+}
+
+.guards button {
+  background: #ececec;
+  border: none;
+  padding: 0.5rem 1rem;
+  margin: 0.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #0058c7;
+}
+
+.guards button:hover {
+  background: #ddd;
+}
+
+.errorMessage {
+  background: #ffe0e0;
+  color: #900;
+  border-radius: 8px;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+

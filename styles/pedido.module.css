@@ -1,0 +1,57 @@
+.container {
+  padding: 1rem 0.5rem;
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: #f5f6f8;
+  font-family: 'Segoe UI', sans-serif;
+  min-height: 100vh;
+}
+
+.titulo {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #2e7d32;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.volver {
+  background: none;
+  border: none;
+  color: #2e7d32;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: color 0.2s ease;
+  padding-left: 0.2rem;
+}
+
+.volver:hover {
+  color: #1b5e20;
+  text-decoration: underline;
+}
+
+.verCarrito {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2e7d32;
+  color: white;
+  padding: 0.8rem 1.4rem;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 1rem;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.verCarrito:hover {
+  background: #1b5e20;
+}

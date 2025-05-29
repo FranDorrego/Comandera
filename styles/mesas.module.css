@@ -1,0 +1,152 @@
+.container {
+  padding: 0.5rem 0.5rem;
+  max-width: 1024px;
+  margin: 0 auto;
+  background-color: #f5f6f8;
+  font-family: 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  position: relative;
+}
+
+.logout {
+  background: none;
+  border: none;
+  color: #2e7d32;
+  font-weight: bold;
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  transition: color 0.2s ease;
+}
+
+.logout:hover {
+  color: #1b5e20;
+  text-decoration: underline;
+}
+
+.name {
+  position: absolute;
+  right: 0px;
+  background: none;
+  border: none;
+  color: #83bd86;
+  font-weight: bold;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  transition: color 0.2s ease;
+}
+
+.mesash1 {
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #2e7d32;
+  margin-bottom: 1.5rem;
+}
+
+.buscarBox {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+}
+
+.inputBuscar {
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  background-color: #fff;
+  color: #333;
+  width: 160px;
+  text-align: center;
+}
+
+.buscarBtn {
+  background-color: #2e7d32;
+  color: white;
+  padding: 0.6rem 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.buscarBtn:hover {
+  background-color: #1b5e20;
+}
+
+.errorBuscar {
+  text-align: center;
+  color: #d32f2f;
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+}
+
+.filtros {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+}
+
+.filtros button {
+  background: white;
+  border: 1px solid #ccc;
+  color: #2e7d32;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+.filtros button:hover {
+  background: #e0f2f1;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 1rem;
+  justify-items: center;
+}
+
+.mesa {
+  background-color: white;
+  border: 1px solid #c8e6c9;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(46, 125, 50, 0.06);
+  text-align: center;
+  transition: transform 0.15s ease;
+  cursor: pointer;
+  width: 90px;
+}
+
+.mesa:hover {
+  transform: scale(1.05);
+}
+
+.mesa span {
+  display: block;
+  margin-top: 0.4rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #2e7d32;
+}
+
+.libre {
+  opacity: 1;
+}
+
+.ocupada {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
