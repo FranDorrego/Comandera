@@ -6,13 +6,14 @@ import json
 import os
 import subprocess
 import shutil
+import signal
 import time
 
-from back import ejecutar_instalacion_backend
+from back import ejecutar_instalacion_backend, PYTHON_EXE_INSTALLED
 from front import ejecutar_instalacion_frontend
 
 CONFIG_FILE = "setup/config.json"
-PYTHON_DIR = "Python32"
+PYTHON_DIR = PYTHON_EXE_INSTALLED
 NODE_DIR = "Node.js"
 BASE_DIR = None
 
@@ -27,6 +28,8 @@ class InstaladorApp:
         self._verificar_estado_instalacion()
         self.root.protocol("WM_DELETE_WINDOW", self._cerrar_aplicacion)
         self.root.iconbitmap("favicon.ico")
+        self.CORRER = True
+
 
     def _crear_interfaz(self):
         frame_path = tk.Frame(self.root)
@@ -131,8 +134,8 @@ class InstaladorApp:
             self.btn_iniciar.config(state="disabled")
             self.btn_start_back.config(state="normal")
             self.btn_start_front.config(state="normal")
-            self.btn_stop_back.config(state="normal")
-            self.btn_stop_front.config(state="normal")
+            self.btn_stop_back.config(state="disabled")
+            self.btn_stop_front.config(state="disabled")
 
             # Si tiene todo instalado, iniciar backend y frontend automáticamente
             if base_ok:
@@ -144,12 +147,15 @@ class InstaladorApp:
     def _iniciar_instalacion(self):
         self._log(self.log_general, "Iniciando instalación...")
         def instalacion():
+            self.btn_iniciar.config(state="disabled")
             self._log(self.log_general, "Instalando backend...")
-            ejecutar_instalacion_backend(
+            if not ejecutar_instalacion_backend(
                 self.base_path.get(),
                 self._log_callback(self.log_back),
                 self._log_callback(self.log_general)
-            )
+            ):
+                self._log(self.log_general, "❌ Error durante la instalación del backend. Verifique los logs.")
+                return
             self._log(self.log_general, "Instalación del backend completada.")
             
             self._log(self.log_general, "Instalando frontend...")
@@ -160,13 +166,15 @@ class InstaladorApp:
             self._log(self.log_general, "Instalación del frontend completada.")
             
             self._verificar_estado_instalacion()
-        threading.Thread(target=instalacion).start()
+        threading.Thread(target=instalacion, daemon=True).start()
 
     def _start_backend(self):
         self.btn_start_back.config(state="disabled")
+        self.btn_stop_back.config(state="normal")
         self._log(self.log_back, "Iniciando servidor backend...")
 
-        python_exe = os.path.abspath(os.path.join("Python32", "python.exe"))
+        from back import VENV_PATH  # Importar BASE_DIR desde el módulo back
+        python_exe = os.path.abspath(os.path.join(f"{VENV_PATH}/Scripts/", "python.exe"))
 
         self.proc_back = subprocess.Popen(
             [python_exe, "-m", "uvicorn", "api:app", "--port", "3001"],
@@ -185,7 +193,7 @@ class InstaladorApp:
         def copia_pega_base():
             veces = 0
             try:
-                while self.root.winfo_exists():
+                while self.CORRER:
                     veces += 1
                     try:
                         if BASE_DIR and os.path.exists(BASE_DIR):
@@ -199,9 +207,9 @@ class InstaladorApp:
             except:
                 pass
 
-        self.hilo_back_base = threading.Thread(target=copia_pega_base)
+        self.hilo_back_base = threading.Thread(target=copia_pega_base, daemon=True)
         self.hilo_back_base.start()
-        self.hilo_back = threading.Thread(target=leer_backend)
+        self.hilo_back = threading.Thread(target=leer_backend, daemon=True)
         self.hilo_back.start()
 
     def _start_frontend(self):
@@ -221,7 +229,7 @@ class InstaladorApp:
                 stderr=subprocess.STDOUT,
                 text=True,
                 encoding="utf-8",
-                creationflags=subprocess.CREATE_NO_WINDOW
+                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
             )
 
             for linea in proceso_build.stdout:
@@ -238,19 +246,24 @@ class InstaladorApp:
                 stderr=subprocess.STDOUT,
                 text=True,
                 encoding="utf-8",
-                creationflags=subprocess.CREATE_NO_WINDOW
+                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
             )
 
-            for linea in self.proc_front.stdout:
-                self._log(self.log_front, f"[serve] {linea.strip()}")
+            try:
+                for linea in self.proc_front.stdout:
+                    self._log(self.log_front, f"[serve] {linea.strip()}")
+            except Exception as e:
+                print(f"Error al leer salida del servidor frontend: {e}")
 
         # Lanzar todo en hilo aparte
         self.btn_start_front.config(state="disabled")
-        self.hilo_front = threading.Thread(target=tarea_frontend)
+        self.btn_stop_front.config(state="normal")
+        self.hilo_front = threading.Thread(target=tarea_frontend, daemon=True)
         self.hilo_front.start()
 
     def _stop_backend(self):
         self.btn_start_back.config(state="normal")
+        self.btn_stop_back.config(state="disabled")
         if hasattr(self, "proc_back") and self.proc_back and self.proc_back.poll() is None:
             self._log(self.log_back, "🛑 Deteniendo backend...")
             self.proc_back.terminate()
@@ -259,16 +272,18 @@ class InstaladorApp:
 
     def _stop_frontend(self):
         self.btn_start_front.config(state="normal")
+        self.btn_stop_front.config(state="disabled")
         if hasattr(self, "proc_front") and self.proc_front and self.proc_front.poll() is None:
             self._log(self.log_front, "🛑 Deteniendo frontend...")
-            self.proc_front.terminate()
+            os.kill(self.proc_front.pid, signal.CTRL_BREAK_EVENT)
             self.proc_front.wait()
             self._log(self.log_front, "✅ Frontend detenido.")
 
     def _cerrar_aplicacion(self):
+        self.CORRER = False
+        self.root.destroy()
         self._stop_backend()
         self._stop_frontend()
-        self.root.destroy()
 
     def _log(self, consola, texto):
         try:
