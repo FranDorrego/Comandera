@@ -17,6 +17,7 @@ PYTHON_DIR = PYTHON_EXE_INSTALLED
 NODE_DIR = "Node.js"
 BASE_DIR = None
 
+
 class InstaladorApp:
     def __init__(self, root):
         self.root = root
@@ -214,6 +215,7 @@ class InstaladorApp:
 
     def _start_frontend(self):
         def tarea_frontend():
+            self._kill_port_3000()
             self._log(self.log_front, "🏗️ Compilando frontend (next build)...")
 
             npm_cmd = os.path.abspath(os.path.join("Node.js", "node-v18.17.1-win-x86", "npm.cmd"))
@@ -229,7 +231,7 @@ class InstaladorApp:
                 stderr=subprocess.STDOUT,
                 text=True,
                 encoding="utf-8",
-                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
+                creationflags=subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
             )
 
             for linea in proceso_build.stdout:
@@ -246,7 +248,7 @@ class InstaladorApp:
                 stderr=subprocess.STDOUT,
                 text=True,
                 encoding="utf-8",
-                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
+                creationflags=subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
             )
 
             try:
@@ -294,6 +296,31 @@ class InstaladorApp:
 
     def _log_callback(self, consola):
         return lambda texto: self._log(consola, texto)
+
+    def _kill_port_3000(self):
+        try:
+            # Verificamos si hay algo usando el puerto 3000
+            output = subprocess.check_output('netstat -ano | findstr :3000', shell=True, text=True)
+            lines = output.strip().split('\n')
+
+            procesos_terminados = 0
+            for line in lines:
+                if 'LISTENING' in line or 'ESTABLISHED' in line:
+                    pid = line.strip().split()[-1]
+                    subprocess.run(["taskkill", "/PID", pid, "/F"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    procesos_terminados += 1
+
+            if procesos_terminados > 0:
+                self._log(self.log_front, f"✅ Puerto 3000 liberado. Procesos finalizados: {procesos_terminados}")
+            else:
+                self._log(self.log_front, "ℹ️ Puerto 3000 estaba libre.")
+
+        except subprocess.CalledProcessError:
+            # findstr no encontró nada: el puerto está libre
+            self._log(self.log_front, "ℹ️ Puerto 3000 está libre. No se realizaron acciones.")
+        except Exception as e:
+            self._log(self.log_front, f"❌ Error al intentar liberar el puerto 3000: {e}")
+
 
 
 if __name__ == "__main__":
