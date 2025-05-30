@@ -8,13 +8,13 @@ import json
 app = FastAPI()
 
 # Configuración
-BASE_CONSULTAS = r"./db.mdb"
+BASE_CONSULTAS = None
 BASE_PEDIDOS = None
 password = "mery46"
 
 
 def buscar_base_pedidos():
-    global BASE_PEDIDOS
+    global BASE_PEDIDOS, BASE_CONSULTAS
     if BASE_PEDIDOS is not None:
         return BASE_PEDIDOS
 
@@ -22,28 +22,26 @@ def buscar_base_pedidos():
     raiz = os.path.dirname(os.path.dirname(directorio_actual)) # 2 niveles arriba
     config_path = os.path.join(raiz, "setup", "config.json")
 
-    print(config_path, raiz, directorio_actual)
-
     if os.path.exists(config_path):
         with open(config_path, "r") as f:
             data = json.load(f)
             base_path = data.get("base_path", "")
+            print(f"[INFO] Base path encontrado: {base_path}")
+            
             if base_path:
                 BASE_PEDIDOS = base_path
+                BASE_CONSULTAS = base_path
                 return base_path
     
+    print("[ERROR] No se encontró la base de pedidos en el archivo de configuración.")
     return None
 
 def ejecutar_sql(query: str):
+    global BASE_CONSULTAS, BASE_PEDIDOS
     pythoncom.CoInitialize()
 
     # Determinar el archivo MDB a usar
-    archivo_mdb = BASE_CONSULTAS
-    if 'cocina' in query.lower():
-        base_pedidos = buscar_base_pedidos()
-        if not base_pedidos:
-            raise HTTPException(status_code=500, detail="No se encontró la base de pedidos.")
-        archivo_mdb = base_pedidos
+    archivo_mdb = buscar_base_pedidos()
 
     try:
         conn = win32com.client.Dispatch("ADODB.Connection")
@@ -68,13 +66,13 @@ def ejecutar_sql(query: str):
             return {"status": "ok", "query": query, "res": "Consulta ejecutada correctamente"}
 
     except Exception as e:
-        print(f"[ERROR ejecutar_sql] Query: {query} | Error: {str(e)}")
+        print(f"[ERROR ejecutar_sql] Query: {query} | Error: {str(e)}", "La base esta en:", archivo_mdb)
         raise HTTPException(status_code=500, detail=f"Error ejecutando SQL: {str(e)}")
 
 
 def obtener_info_tablas():
     pythoncom.CoInitialize()
-    archivo_mdb = BASE_CONSULTAS
+    archivo_mdb = buscar_base_pedidos()
 
     try:
         conn = win32com.client.Dispatch("ADODB.Connection")
@@ -101,7 +99,7 @@ def obtener_info_tablas():
         conn.Close()
         return {"status": "ok", "query": "estructura base", "res": tablas_info}
     except Exception as e:
-        print(f"[ERROR obtener_info_tablas] {str(e)}")
+        print(f"[ERROR obtener_info_tablas] {str(e)}", "La base esta en:", archivo_mdb)
         raise HTTPException(status_code=500, detail=f"Error obteniendo info de tablas: {str(e)}")
 
 def select_limitado(tabla, limit):

@@ -67,12 +67,6 @@ def ejecutar_instalacion_backend(ruta_mdb, log, log_general):
         else:
             log_general("⚠️ No se encontró requirements.txt")
 
-        # Copiar base de datos
-        if ruta_mdb and os.path.exists(ruta_mdb):
-            destino = os.path.join(HOSTBASE_DIR, "db.mdb")
-            shutil.copy2(ruta_mdb, destino)
-            log_general(f"📁 Base de datos copiada a {destino}")
-
         return True
     
     except Exception as e:

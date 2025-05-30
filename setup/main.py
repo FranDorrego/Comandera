@@ -136,8 +136,8 @@ class InstaladorApp:
             self.btn_iniciar.config(state="disabled")
             self.btn_start_back.config(state="normal")
             self.btn_start_front.config(state="normal")
-            self.btn_stop_back.config(state="disabled")
-            self.btn_stop_front.config(state="disabled")
+            self.btn_stop_back.config(state="normal")
+            self.btn_stop_front.config(state="normal")
 
             # Si tiene todo instalado, iniciar backend y frontend automáticamente
             if base_ok:
@@ -151,13 +151,13 @@ class InstaladorApp:
         def instalacion():
             self.btn_iniciar.config(state="disabled")
             self._log(self.log_general, "Instalando backend...")
-            if not ejecutar_instalacion_backend(
+            
+            ejecutar_instalacion_backend(
                 self.base_path.get(),
                 self._log_callback(self.log_back),
                 self._log_callback(self.log_general)
-            ):
-                self._log(self.log_general, "❌ Error durante la instalación del backend. Verifique los logs.")
-                return
+            )
+
             self._log(self.log_general, "Instalación del backend completada.")
             
             self._log(self.log_general, "Instalando frontend...")
@@ -172,8 +172,8 @@ class InstaladorApp:
 
     def _start_backend(self):
         self.btn_start_back.config(state="disabled")
-        self.btn_stop_back.config(state="normal")
         self._log(self.log_back, "Iniciando servidor backend...")
+        self._kill_port(3001)
 
         from back import VENV_PATH  # Importar BASE_DIR desde el módulo back
         python_exe = os.path.abspath(os.path.join(f"{VENV_PATH}/Scripts/", "python.exe"))
@@ -192,31 +192,13 @@ class InstaladorApp:
             for linea in self.proc_back.stdout:
                 self._log(self.log_back, linea.strip())
 
-        def copia_pega_base():
-            veces = 0
-            try:
-                while self.CORRER:
-                    veces += 1
-                    try:
-                        if BASE_DIR and os.path.exists(BASE_DIR):
-                            destino = os.path.join("HostBase", "db.mdb")
-                            if veces % 5 == 0:
-                                self._log(self.log_back, f"📁 Copiando base de datos a {destino}")
-                            shutil.copy2(self.base_path.get(), destino)
-                    except Exception as e:
-                        self._log(self.log_back, f"❌ Error al copiar base de datos: {e}")
-                    time.sleep(5)
-            except:
-                pass
 
-        self.hilo_back_base = threading.Thread(target=copia_pega_base, daemon=True)
-        self.hilo_back_base.start()
         self.hilo_back = threading.Thread(target=leer_backend, daemon=True)
         self.hilo_back.start()
 
     def _start_frontend(self):
         def tarea_frontend():
-            self._kill_port_3000()
+            self._kill_port(3000)
             self._log(self.log_front, "🏗️ Compilando frontend (next build)...")
 
             npm_cmd = os.path.abspath(os.path.join("Node.js", "node-v18.17.1-win-x86", "npm.cmd"))
@@ -260,13 +242,12 @@ class InstaladorApp:
 
         # Lanzar todo en hilo aparte
         self.btn_start_front.config(state="disabled")
-        self.btn_stop_front.config(state="normal")
         self.hilo_front = threading.Thread(target=tarea_frontend, daemon=True)
         self.hilo_front.start()
 
     def _stop_backend(self):
         self.btn_start_back.config(state="normal")
-        self.btn_stop_back.config(state="disabled")
+        self._kill_port(3001)
         if hasattr(self, "proc_back") and self.proc_back and self.proc_back.poll() is None:
             self._log(self.log_back, "🛑 Deteniendo backend...")
             self.proc_back.terminate()
@@ -275,7 +256,7 @@ class InstaladorApp:
 
     def _stop_frontend(self):
         self.btn_start_front.config(state="normal")
-        self.btn_stop_front.config(state="disabled")
+        self._kill_port(3000)
         if hasattr(self, "proc_front") and self.proc_front and self.proc_front.poll() is None:
             self._log(self.log_front, "🛑 Deteniendo frontend...")
             os.kill(self.proc_front.pid, signal.CTRL_BREAK_EVENT)
@@ -287,7 +268,6 @@ class InstaladorApp:
         self.root.destroy()
         self._stop_backend()
         self._stop_frontend()
-        self._kill_port_3000()
 
     def _log(self, consola, texto):
         try:
@@ -299,10 +279,10 @@ class InstaladorApp:
     def _log_callback(self, consola):
         return lambda texto: self._log(consola, texto)
 
-    def _kill_port_3000(self):
+    def _kill_port(self, puerto=3000):
         try:
             # Verificamos si hay algo usando el puerto 3000
-            output = subprocess.check_output('netstat -ano | findstr :3000', shell=True, text=True)
+            output = subprocess.check_output(f'netstat -ano | findstr :{puerto}', shell=True, text=True)
             lines = output.strip().split('\n')
 
             procesos_terminados = 0
@@ -313,15 +293,15 @@ class InstaladorApp:
                     procesos_terminados += 1
 
             if procesos_terminados > 0:
-                self._log(self.log_front, f"✅ Puerto 3000 liberado. Procesos finalizados: {procesos_terminados}")
+                self._log(self.log_front, f"✅ Puerto {puerto} liberado. Procesos finalizados: {procesos_terminados}")
             else:
-                self._log(self.log_front, "ℹ️ Puerto 3000 estaba libre.")
+                self._log(self.log_front, f"ℹ️ Puerto {puerto} estaba libre.")
 
         except subprocess.CalledProcessError:
             # findstr no encontró nada: el puerto está libre
-            self._log(self.log_front, "ℹ️ Puerto 3000 está libre. No se realizaron acciones.")
+            self._log(self.log_front, f"ℹ️ Puerto {puerto} está libre. No se realizaron acciones.")
         except Exception as e:
-            self._log(self.log_front, f"❌ Error al intentar liberar el puerto 3000: {e}")
+            self._log(self.log_front, f"❌ Error al intentar liberar el puerto {puerto}: {e}")
 
 
 
