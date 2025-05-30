@@ -1,6 +1,6 @@
-# README Global – Sistema de Comandera 🍽️🧾🖥️
+# README Global – Sistema de Comandera 🍽️📜🖥️
 
-Este proyecto está compuesto por un frontend en Next.js y un backend en Python (FastAPI) que se comunica con una base de datos Microsoft Access. A continuación se detalla cómo configurar y ejecutar el entorno completo en una máquina local. Además, se detalla el sistema automatizado de instalación y despliegue.
+Este proyecto está compuesto por un frontend en Next.js y un backend en Python (FastAPI) que se comunica con una base de datos Microsoft Access. A continuación se detalla cómo configurar y ejecutar el entorno completo en una máquina local. Además, se describe el sistema automatizado de instalación y despliegue.
 
 ---
 
@@ -20,98 +20,147 @@ Este proyecto está compuesto por un frontend en Next.js y un backend en Python 
 
 ---
 
-## 🖥️ Instalador Automático con Interfaz (Tkinter)
+## 🛠️ Instalador Automático – Sistema de Comandera (Versión .EXE)
 
-Se proporciona un script que, al convertirse en binario (`.exe`), permite:
+Este instalador permite que el cliente ejecute y actualice automáticamente todo el sistema de Comandera con solo hacer doble clic en un `.exe`, sin requerir conocimientos técnicos.
 
-🔹 Mostrar una ventana gráfica con **3 consolas embebidas**:
+---
 
-* Consola de logs generales (instalación, clonación, descargas...)
-* Consola de backend (servidor Python/FastAPI)
-* Consola de frontend (servidor Next.js)
+## 📁 Estructura de Carpetas
 
-🔹 Permitir al usuario seleccionar la **base de datos `.mdb`** mediante un input gráfico. Si no se selecciona, el botón de instalación permanece deshabilitado.
+```
+📦 Comandera/
+├── Comandera.exe            ← Ejecutable de auto-actualización
+├── main.exe                 ← Instalador interno con interfaz Tkinter
+├── HostBase/                ← Backend en Python + base Access
+├── frontend/                ← Proyecto Next.js
+├── Node.js/                 ← Node.js portable con npm.cmd
+├── Python32/                ← Python 32-bits portable
+├── setup/config.json        ← Ruta seleccionada por el usuario
+└── Instalador/
+    ├── Comandera.py         ← Código fuente auto-actualizador
+    └── Comandera.exe        ← Copia del auto-actualizador
+```
 
-🔹 Guardar las preferencias del usuario en un archivo `config.json` local. Si no existe, lo genera automáticamente en la carpeta del ejecutable.
+---
 
-🔹 Realizar automáticamente:
+## 🚦 Flujo de Ejecución del Instalador
 
-* Clonado del repositorio
-* Verificación e instalación de Python (32 bits)
-* Verificación e instalación de Node.js
-* Creación de entorno virtual `venv32` para el backend
-* Instalación de dependencias (backend y frontend)
-* Ejecución de servidores
+🔹 Primera ejecución de `Comandera.exe`:
 
-Toda la salida estándar de estos procesos es visible en tiempo real desde la interfaz, lo que permite observar el progreso completo.
+* Solicita permisos de administrador.
+* Verifica si existe la carpeta `Comandera/`.
+* Si no existe:
+
+  * Clona el repositorio desde GitHub.
+  * Ejecuta `main.exe` dentro del repositorio.
+
+🔹 Si la carpeta ya existe:
+
+* Entra en la carpeta.
+* Ejecuta el nuevo instalador `main.exe` con flag para **no volver a clonar**.
+
+---
+
+## 🐍 Python (32 bits) – Instalación y Uso
+
+* Se descarga automáticamente desde python.org si no está instalado en `Python32/`.
+* Instalación visual, el usuario debe completarla.
+* Luego se usa para:
+
+  * Crear `venv32/` en `HostBase/`.
+  * Instalar dependencias de `requirements.txt`.
+
+✅ Compatible con Access gracias a `pywin32` y `Microsoft.Jet.OLEDB.4.0`.
+
+---
+
+## 🌐 Node.js – Instalación y Uso
+
+* Instala Node.js portable en `Node.js/` (v18.17.1).
+* Ejecuta:
+
+  ```bash
+  npm install
+  npm run build
+  npm run start
+  ```
+* Salida mostrada en consola visual del `.exe`.
+
+🧠 Configuración Persistente: `setup/config.json`
+
+🚨 Prevención de errores:
+
+* Detecta puerto 3000 ocupado (Next.js) y lo libera con `taskkill /F`.
+* Ejecuta backend y frontend como hilos secundarios daemon (se cierran al salir).
+
+🔁 Auto-Actualización:
+
+* Ejecuta `git reset --hard` y actualiza repositorio.
+* Corre el `main.exe` más reciente.
 
 ---
 
 ## 📦 Instalación y Ejecución – Frontend (Next.js)
 
-### 1. Instalar dependencias
+1. Instalar dependencias:
 
 ```bash
 cd frontend
 npm install
 ```
 
-### 2. Variables de entorno
-
-Crear un archivo `.env.local` dentro de `frontend/` con el contenido necesario. Ejemplo:
+2. Variables de entorno:
+   Crear `.env.local` en `frontend/`:
 
 ```
 NEXT_PUBLIC_API_BASE=http://localhost:3000
 ```
 
-### 3. Ejecutar frontend (manualmente o con script)
+3. Ejecutar frontend:
 
 ```bash
 npm run dev
 ```
 
-O usando el archivo:
+O usar:
 
 ```bash
 run_front.bat
 ```
 
-Esto iniciará el servidor en:
-
-```
-http://localhost:3000
-```
+Acceder en: `http://localhost:3000`
 
 ---
 
 ## 🐍 Instalación y Ejecución – Backend (FastAPI)
 
-### 1. Crear entorno virtual 32 bits (solo una vez)
+1. Crear entorno virtual:
 
 ```bash
-& 'C:\Users\franc\AppData\Local\Programs\Python\Python313-32\python.exe' -m venv venv32
+& 'C:\Path\Python313-32\python.exe' -m venv venv32
 ```
 
-### 2. Activar entorno
+2. Activar entorno:
 
 ```bash
 cd HostBase
 .\venv32\Scripts\Activate.ps1
 ```
 
-### 3. Instalar dependencias
+3. Instalar dependencias:
 
 ```bash
 pip install fastapi uvicorn pywin32
 ```
 
-### 4. Ejecutar servidor backend (manual o con .bat)
+4. Ejecutar servidor backend:
 
 ```bash
 uvicorn api:app --port 3000 --reload
 ```
 
-O usar el archivo:
+O usar:
 
 ```bash
 run_back.bat
@@ -121,26 +170,26 @@ run_back.bat
 
 ## 🗄️ Base de Datos
 
-Ubicar el archivo `sifare.mdb` dentro de la carpeta del backend (`HostBase/`). La clave de acceso por defecto es `mery46`. No es necesario conectarla previamente, el backend se encarga de abrir y cerrar conexión cuando es necesario.
+* Ubicar `sifare.mdb` dentro de `HostBase/`.
+* Clave por defecto: `mery46`.
+* El backend se encarga de abrir/cerrar la conexión.
 
 ---
 
 ## 🧪 Test rápido de conexión
 
-Puedes probar que la API funcione correctamente con:
-
 ```bash
-curl -X POST http://localhost:3000/api/meseros -H "Content-Type: application/json" -d '{"query": "SELECT * FROM meseros"}'
+curl -X POST http://localhost:3000/api/meseros \
+-H "Content-Type: application/json" \
+-d '{"query": "SELECT * FROM meseros"}'
 ```
 
 ---
 
 ## 📚 Visualización de documentación específica
 
-Este README resume el funcionamiento general. Para más detalle:
-
-🔹 Ver `frontend/README.md`: Detalla estructura, componentes y estilos del frontend.
-🔹 Ver `HostBase/README.md`: Explica el backend FastAPI, los endpoints disponibles y la estructura de la base Access.
+* `frontend/README.md`: Estructura y estilos del frontend.
+* `HostBase/README.md`: Endpoints FastAPI y estructura de la base Access.
 
 ---
 
