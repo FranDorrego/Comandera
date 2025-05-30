@@ -171,7 +171,7 @@ run_back.bat
 ## 🗄️ Base de Datos
 
 * Ubicar `sifare.mdb` dentro de `HostBase/`.
-* Clave por defecto: `mery46`.
+* Clave por defecto: `*********`.
 * El backend se encarga de abrir/cerrar la conexión.
 
 ---

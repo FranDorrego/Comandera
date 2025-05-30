@@ -206,6 +206,24 @@ class InstaladorApp:
                 self._log(self.log_front, "❌ No se encontró npm.cmd. ¿Está correctamente instalado Node.js?")
                 return
 
+            # 0. Instalar dependencias
+            self._log(self.log_front, "📦 Instalando dependencias (npm install)...")
+            proceso_install = subprocess.Popen(
+                [npm_cmd, "install"],
+                cwd="frontend",
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                encoding="utf-8",
+                creationflags=subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
+            )
+
+            for linea in proceso_install.stdout:
+                self._log(self.log_front, f"[install] {linea.strip()}")
+
+            proceso_install.wait()
+            self._log(self.log_front, "✅ npm install finalizado.")
+
             # 1. Compilar
             proceso_build = subprocess.Popen(
                 [npm_cmd, "run", "build"],

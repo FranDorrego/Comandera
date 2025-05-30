@@ -7,7 +7,7 @@ Este proyecto permite conectar una base de datos Microsoft Access (`sifare.mdb`)
 ## ⚠️ Requisitos Importantes
 
 * Python 32 bits (**obligatorio**) para usar `Microsoft.Jet.OLEDB.4.0`
-* Base de datos Access `.mdb` con clave (`mery46` en este caso)
+* Base de datos Access `.mdb` con clave
 * Entorno virtual 32 bits (`venv32`) ya creado dentro de `HostBase`
 * Librerías necesarias:
 
