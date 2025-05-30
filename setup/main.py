@@ -166,8 +166,10 @@ class InstaladorApp:
         self.btn_start_back.config(state="disabled")
         self._log(self.log_back, "Iniciando servidor backend...")
 
+        python_exe = os.path.abspath(os.path.join("Python32", "python.exe"))
+
         self.proc_back = subprocess.Popen(
-            ["HostBase\\venv32\\Scripts\\uvicorn", "api:app", "--port", "3001"],
+            [python_exe, "-m", "uvicorn", "api:app", "--port", "3001"],
             cwd="HostBase",
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
