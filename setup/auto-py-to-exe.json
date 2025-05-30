@@ -64,6 +64,10 @@
   {
    "optionDest": "datas",
    "value": "C:/Users/franc/Desktop/Comandera_dev/setup/favicon.ico;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Users/franc/Desktop/Comandera_dev/setup/signature.txt;."
   }
  ],
  "nonPyinstallerOptions": {

@@ -1,8 +1,8 @@
 import os
 import subprocess
 import urllib.request
-import shutil
 import getpass
+from tkinter import filedialog, messagebox
 
 # Parámetros
 PYTHON_EXE_URL = "https://www.python.org/ftp/python/3.10.9/python-3.10.9.exe"
@@ -31,15 +31,26 @@ def ejecutar_instalacion_backend(ruta_mdb, log, log_general):
 
             if not os.path.exists(PYTHON_EXE_INSTALLED):
                 log_general("❌ No se encontró Python 32 bits en la ubicación esperada.")
-                log_general("📌 Por favor asegúrese de NO cambiar la ruta de instalación.")
-                return
-            log_general("✅ Python 32 bits detectado.")
+                log_general("📌 Seleccione manualmente el ejecutable de Python...")
 
+                archivo = filedialog.askopenfilename(
+                    filetypes=[("Ejecutable", "*.exe")],
+                    title="Selecciona el ejecutable de Python 32 bits"
+                )
+
+                if archivo and os.path.exists(archivo):
+                    python_exe = archivo
+                else:
+                    messagebox.showerror("Python no encontrado", "No se pudo localizar Python 32 bits. Se cancela la instalación.")
+                    return
+            else:
+                python_exe = PYTHON_EXE_INSTALLED
+                log_general("✅ Python 32 bits detectado.")
         else:
+            python_exe = PYTHON_EXE_INSTALLED
             log_general("✅ Python 32 bits ya estaba instalado.")
 
         python_exe = PYTHON_EXE_INSTALLED
-        pip_exe = os.path.join(PYTHON_INSTALL_DIR, "Scripts", "pip.exe")
 
         # Crear entorno virtual
         if not os.path.exists(VENV_PATH):
@@ -51,15 +62,7 @@ def ejecutar_instalacion_backend(ruta_mdb, log, log_general):
 
         pip_venv = os.path.join(VENV_PATH, "Scripts", "pip.exe")
 
-        # Instalar greenlet manual si está en requirements
-        if os.path.exists(REQUIREMENTS) and "greenlet" in open(REQUIREMENTS).read():
-            log_general("🔽 Descargando greenlet precompilado...")
-            urllib.request.urlretrieve(WHEEL_GREENLET_URL, WHEEL_LOCAL_PATH)
-            subprocess.check_call([pip_venv, "install", WHEEL_LOCAL_PATH])
-            os.remove(WHEEL_LOCAL_PATH)
-            log_general("✅ greenlet instalado.")
-
-        # Instalar resto de dependencias
+        # Instalar de dependencias
         if os.path.exists(REQUIREMENTS):
             log_general("📦 Instalando dependencias del backend...")
             subprocess.check_call([pip_venv, "install", "-r", REQUIREMENTS])

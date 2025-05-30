@@ -47,23 +47,9 @@ def ejecutar_instalacion_frontend(log, log_general):
 
         log_general(f"✅ Node.js detectado. Versión actual: {version_actual}")
 
-        log_general("📦 Instalando dependencias del frontend...")
-        proceso = subprocess.Popen(["npm", "install"], cwd=os.path.abspath(FRONTEND_DIR),
-                                   stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-
-        def leer_salida():
-            for linea in proceso.stdout:
-                log_general(linea.strip())
-
-        hilo_log = threading.Thread(target=leer_salida)
-        hilo_log.start()
-        proceso.wait()
-        hilo_log.join()
-
-        log_general("✅ Dependencias del frontend instaladas.")
-
+        return True
     except Exception as e:
-        log_general(f"❌ Error durante instalación del frontend: {e}")
+        log_general(f"❌ Error durante instalación del frontend: {e}", f"npm install cwd= {os.path.abspath(FRONTEND_DIR)}")
 
 
 def existe_node():

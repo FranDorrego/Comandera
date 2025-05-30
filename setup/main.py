@@ -9,11 +9,10 @@ import shutil
 import signal
 import time
 
-from back import ejecutar_instalacion_backend, PYTHON_EXE_INSTALLED
+from back import ejecutar_instalacion_backend, VENV_PATH
 from front import ejecutar_instalacion_frontend, existe_node
 
 CONFIG_FILE = "setup/config.json"
-PYTHON_DIR = PYTHON_EXE_INSTALLED
 BASE_DIR = None
 
 
@@ -30,6 +29,15 @@ class InstaladorApp:
         try: self.root.iconbitmap("favicon.ico")
         except: pass
         self.CORRER = True
+        self.node_manual_path = None
+        self.python_manual_path = None
+
+    def _seleccionar_ejecutable(self, tipo):
+        archivo = filedialog.askopenfilename(
+            filetypes=[("Ejecutable", "*.exe")],
+            title=f"Selecciona el ejecutable de {tipo}"
+        )
+        return archivo if archivo else None
 
 
     def _crear_interfaz(self):
@@ -64,7 +72,7 @@ class InstaladorApp:
         self.frame_logs.pack(padx=10, pady=10, fill="both", expand=True)
 
         # Detectar si la instalación ya fue hecha
-        python_ok = os.path.exists(PYTHON_DIR)
+        python_ok = os.path.exists(VENV_PATH)
         node_ok = existe_node()
 
         if not (python_ok and node_ok):
@@ -123,7 +131,7 @@ class InstaladorApp:
                 BASE_DIR = os.path.dirname(self.base_path.get()) if self.base_path.get() else None
     
     def _verificar_estado_instalacion(self):
-        python_ok = os.path.exists(PYTHON_DIR)
+        python_ok = os.path.exists(VENV_PATH)
         node_ok = existe_node()
         base_ok = os.path.exists(self.base_path.get())
 
@@ -151,18 +159,24 @@ class InstaladorApp:
             self.btn_iniciar.config(state="disabled")
             self._log(self.log_general, "Instalando backend...")
             
-            ejecutar_instalacion_backend(
+            if not ejecutar_instalacion_backend(
                 self.base_path.get(),
                 self._log_callback(self.log_back),
                 self._log_callback(self.log_general)
-            )
+            ):
+                self.btn_iniciar.config(state="normal")
+                print("❌ Error al instalar el backend. Verifique los logs.")
+                return
             self._log(self.log_general, "Instalación del backend completada.")
             
             self._log(self.log_general, "Instalando frontend...")
-            ejecutar_instalacion_frontend(
+            if not ejecutar_instalacion_frontend(
                 self._log_callback(self.log_front),
                 self._log_callback(self.log_general)
-            )
+            ):
+                self.btn_iniciar.config(state="normal")
+                print("❌ Error al instalar el frontend. Verifique los logs.")
+                return
             self._log(self.log_general, "Instalación del frontend completada.")
             
             self._verificar_estado_instalacion()
@@ -334,7 +348,9 @@ class InstaladorApp:
             self._log(self.log_front, f"❌ Error al intentar liberar el puerto {puerto}: {e}")
 
 
-
+import base64
+mensaje = base64.b64decode("U2lzdGVtYSBkZXNhcnJvbGFkbyBwb3IgRnJhbmNvIERvcnJlZ28gLSBBcmR1TWFrZXIgMjAyNQ==").decode()
+print(mensaje)
 
 if __name__ == "__main__":
     root = tk.Tk()

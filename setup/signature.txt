@@ -1,0 +1,5 @@
+Yo, Franco Nicolás Dorrego (francodorrego@gmail.com), declaro que he creado la totalidad del sistema desarrollado bajo el nombre de ArduMaker, desarrolladora de proyectos de programación web con sede en Portugal y Argentina, durante el año 2025.
+
+Este sistema fue realizado a pedido para el cliente de Sifare, incluyendo el desarrollo completo del frontend, backend, automatización de instalación, y la integración con tecnologías necesarias para su correcto funcionamiento.
+
+Todos los derechos de desarrollo y personalización fueron realizados de manera exclusiva para el proyecto solicitado por Sifare.
