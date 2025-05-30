@@ -26,6 +26,7 @@ class InstaladorApp:
         self._cargar_config()
         self._verificar_estado_instalacion()
         self.root.protocol("WM_DELETE_WINDOW", self._cerrar_aplicacion)
+        self.root.iconbitmap("favicon.ico")
 
     def _crear_interfaz(self):
         frame_path = tk.Frame(self.root)
@@ -180,19 +181,23 @@ class InstaladorApp:
 
         def copia_pega_base():
             veces = 0
-            while True:
-                veces += 1
-                try:
-                    if BASE_DIR and os.path.exists(BASE_DIR):
-                        destino = os.path.join("HostBase", "db.mdb")
-                        if veces % 5 == 0:
-                            self._log(self.log_back, f"📁 Copiando base de datos a {destino}")
-                        shutil.copy2(self.base_path.get(), destino)
-                except Exception as e:
-                    self._log(self.log_back, f"❌ Error al copiar base de datos: {e}")
-                time.sleep(5)
+            try:
+                while self.root.winfo_exists():
+                    veces += 1
+                    try:
+                        if BASE_DIR and os.path.exists(BASE_DIR):
+                            destino = os.path.join("HostBase", "db.mdb")
+                            if veces % 5 == 0:
+                                self._log(self.log_back, f"📁 Copiando base de datos a {destino}")
+                            shutil.copy2(self.base_path.get(), destino)
+                    except Exception as e:
+                        self._log(self.log_back, f"❌ Error al copiar base de datos: {e}")
+                    time.sleep(5)
+            except:
+                pass
 
-        threading.Thread(target=copia_pega_base, daemon= True).start()
+        self.hilo_back_base = threading.Thread(target=copia_pega_base)
+        self.hilo_back_base.start()
         self.hilo_back = threading.Thread(target=leer_backend)
         self.hilo_back.start()
 
@@ -254,7 +259,6 @@ class InstaladorApp:
             self.proc_front.terminate()
             self.proc_front.wait()
             self._log(self.log_front, "✅ Frontend detenido.")
-
 
     def _cerrar_aplicacion(self):
         self._stop_backend()
