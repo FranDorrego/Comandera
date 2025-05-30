@@ -7,7 +7,7 @@
   },
   {
    "optionDest": "filenames",
-   "value": "C:/Users/franc/Desktop/Comandera/setup/main.py"
+   "value": "C:/Users/franc/Desktop/Comandera_dev/setup/main.py"
   },
   {
    "optionDest": "onefile",
@@ -55,15 +55,15 @@
   },
   {
    "optionDest": "datas",
-   "value": "C:/Users/franc/Desktop/Comandera/favicon.ico;."
+   "value": "C:/Users/franc/Desktop/Comandera_dev/setup/front.py;."
   },
   {
    "optionDest": "datas",
-   "value": "C:/Users/franc/Desktop/Comandera/setup/back.py;."
+   "value": "C:/Users/franc/Desktop/Comandera_dev/setup/back.py;."
   },
   {
    "optionDest": "datas",
-   "value": "C:/Users/franc/Desktop/Comandera/setup/front.py;."
+   "value": "C:/Users/franc/Desktop/Comandera_dev/setup/favicon.ico;."
   }
  ],
  "nonPyinstallerOptions": {

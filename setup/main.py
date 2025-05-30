@@ -28,7 +28,8 @@ class InstaladorApp:
         self._cargar_config()
         self._verificar_estado_instalacion()
         self.root.protocol("WM_DELETE_WINDOW", self._cerrar_aplicacion)
-        self.root.iconbitmap("favicon.ico")
+        try: self.root.iconbitmap("favicon.ico")
+        except: pass
         self.CORRER = True
 
 
@@ -286,6 +287,7 @@ class InstaladorApp:
         self.root.destroy()
         self._stop_backend()
         self._stop_frontend()
+        self._kill_port_3000()
 
     def _log(self, consola, texto):
         try:
