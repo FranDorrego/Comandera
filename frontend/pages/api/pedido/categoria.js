@@ -1,3 +1,6 @@
+// Este endpoint obtiene las categorías de productos desde la base de datos
+// Lo deje sin usar, pero puede ser útil para el futuro
+
 export default async function handler(req, res) {
   const url = process.env.link_base || "http://localhost:3001";
 

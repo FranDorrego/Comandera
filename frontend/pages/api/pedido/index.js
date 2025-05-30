@@ -1,5 +1,8 @@
 import crypto from "crypto";
 
+// Este endpoint recibe un pedido y lo guarda en la base de datos
+// Si hay un error, hace rollback de los cambios
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Método no permitido" });

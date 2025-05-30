@@ -43,7 +43,7 @@ export default function Pedido() {
     });
 
     // notificar online...
-    fetch(`/api/pedido/online?mesa=${mesa}&user=${mesero_actual?.me_des}`)
+    //fetch(`/api/pedido/online?mesa=${mesa}&user=${mesero_actual?.me_des}`)
   };
 
 
@@ -57,7 +57,7 @@ export default function Pedido() {
     });
 
     // notificar online...
-    fetch(`/api/pedido/online?mesa=${mesa}&user=${mesero_actual?.me_des}`)
+    //fetch(`/api/pedido/online?mesa=${mesa}&user=${mesero_actual?.me_des}`)
   };
 
   const handleSubmit = async () => {
@@ -80,7 +80,7 @@ export default function Pedido() {
     }
 
     // notificar online...
-    fetch(`/api/pedido/online?mesa=${mesa}&user=${mesero_actual?.me_des}&delete=true`)
+    //fetch(`/api/pedido/online?mesa=${mesa}&user=${mesero_actual?.me_des}&delete=true`)
   };
 
   return (
@@ -89,7 +89,7 @@ export default function Pedido() {
         <div>
           <div className={styles.name}>{mesero_actual?.me_des}</div>
           <button onClick={() => {
-            fetch(`/api/pedido/online?mesa=${mesa}&user=${mesero_actual?.me_des}&delete=true`);
+            //fetch(`/api/pedido/online?mesa=${mesa}&user=${mesero_actual?.me_des}&delete=true`);
             router.push("/mesas")
           }} className={styles.volver}>
             ⬅ Volver

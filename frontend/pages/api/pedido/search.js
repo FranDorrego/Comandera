@@ -1,3 +1,9 @@
+
+// Este endpoint busca productos por nombre
+// y devuelve los primeros 8 resultados
+// url?name=<nombre>
+
+
 export default async function handler(req, res) {
   const { name } = req.query;
   const url = process.env.link_base || "http://localhost:3001";
@@ -11,7 +17,7 @@ export default async function handler(req, res) {
   }
 
   const searchTerm = name.replace(/'/g, "''"); // escapamos comillas simples
-  const query = `SELECT TOP 8 pro_cod, pro_des, pro_val, pro_cat FROM productos WHERE pro_des LIKE '%${searchTerm}%' AND pro_val > 0`;
+  const query = `SELECT TOP 12 pro_cod, pro_des, pro_val, pro_cat, pro_estadoV FROM productos WHERE (pro_des LIKE '%${searchTerm}%' OR pro_cod LIKE '%${searchTerm}%') AND pro_val > 0; `;
 
   try {
     const response = await fetch(`${url}/api/productos`, {

@@ -43,7 +43,7 @@ export default function Home() {
     const res = await fetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idMesero: perfil.me_des, clave: perfil.me_cod }),
+      body: JSON.stringify({ idMesero: perfil.me_cod, clave: perfil.me_ide }),
     });
 
     if (res.ok) {
@@ -62,7 +62,7 @@ export default function Home() {
           <Image src="/logo.png" alt="Logo" width={80} height={80} />
         </div>
 
-        <h1 className={styles.loginH1}>Sistema de hola</h1>
+        <h1 className={styles.loginH1}>Sistema Sifare</h1>
         <p className={styles.loginp}>Inicia sesión</p>
 
         {error && <div className={styles.errorMessage}>{error}</div>}

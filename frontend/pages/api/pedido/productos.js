@@ -1,3 +1,8 @@
+
+// Este endpoint obtiene los primeros 8 productos de la base de datos
+// o los de una categoría específica si se proporciona como parámetro url?categoria=<categoria>
+
+
 export default async function handler(req, res) {
   const url = process.env.link_base || "http://localhost:3001";
   const { categoria } = req.query;
@@ -8,7 +13,7 @@ export default async function handler(req, res) {
 
   try {
     // 1. Armar query SQL
-    let query = "SELECT TOP 5 pro_cod, pro_des, pro_val, pro_cat FROM productos where pro_val > 0";
+    let query = "SELECT TOP 8 pro_cod, pro_des, pro_val, pro_cat, pro_estadoV FROM productos where pro_val > 0";
 
     if (categoria) {
       query += ` WHERE pro_cat='${categoria}'`;
@@ -33,6 +38,8 @@ export default async function handler(req, res) {
       nombre: p.pro_des,
       precio: parseFloat(p.pro_val),
       categoria: p.pro_cat,
+      pro_estadoV: p.pro_estadoV,
+      //pro_estadoV: 'N',
     }));
 
     return res.status(200).json({ status: "ok", productos });

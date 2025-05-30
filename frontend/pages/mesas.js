@@ -5,8 +5,8 @@ import Image from "next/image";
 import Cookies from "js-cookie";
 
 export default function Mesas() {
-  const MIN_POR_SECCION = 10;
-  const MAX_SECCIONES = 5;
+  const MIN_POR_SECCION = 20;
+  const MAX_SECCIONES = 4;
 
   const [mesas, setMesas] = useState([]);
   const [errorBuscar, setErrorBuscar] = useState("");
@@ -21,8 +21,8 @@ export default function Mesas() {
         const res = await fetch("/api/mesas");
         const data = await res.json();
         if (data.status === "ok") {
-          const mesasFiltradas = data.mesas.filter((m) => m.tipo === "M");
-          setMesas(mesasFiltradas);
+          setMesas(data.mesas);
+          setRango(rangos[0]); // Establecer el primer rango por defecto
         }
       } catch (error) {
         console.error("Error al cargar mesas:", error);
@@ -61,11 +61,11 @@ export default function Mesas() {
       rangos.push([inicio, fin]);
       actual = fin + 1;
     }
-
     return rangos;
   };
 
   const rangos = generarRangos();
+  
 
   const buscarYEntrar = async () => {
     setErrorBuscar("");
@@ -106,8 +106,6 @@ export default function Mesas() {
       }}>
         Cerrar sesión
       </button>
-
-      <div className={styles.mesash1}>Mesas disponibles</div>
 
       <div className={styles.buscarBox}>
         <input

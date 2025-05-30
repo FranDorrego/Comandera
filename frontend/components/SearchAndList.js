@@ -23,7 +23,7 @@ export default function SearchAndList({ onAdd, mesero, mesa }) {
     }
 
     // notificar online...
-    fetch(`/api/pedido/online?mesa=${mesa}&user=${mesero?.me_id}`)
+    //fetch(`/api/pedido/online?mesa=${mesa}&user=${mesero?.me_id}`)
   };
 
   // Cargar inicial
@@ -54,24 +54,47 @@ export default function SearchAndList({ onAdd, mesero, mesa }) {
           </div>
         )}
 
-
-        {productos.length > 0 && productos.map(prod => (
-          <div key={`${prod.id}-${prod.nombre}-${prod.precio}`} className={styles.card}>
+        {productos.map(prod => (
+          <div
+            key={`${prod.id}-${prod.nombre}-${prod.precio}`}
+            className={`${styles.card} ${prod.pro_estadoV === "N" ? styles.cardDisabled : ""}`}
+          >
             <div className={styles.cardHeader}>
-              <h4>{prod.nombre}</h4>
+              <div>
+                <span className={styles.codigo}>ID: {prod.id}</span>
+                <h4 className={styles.nombre}>{prod.nombre}</h4>
+              </div>
               <span className={styles.precio}>${formatearMiles(prod.precio)}</span>
             </div>
-            <input
-              type="text"
-              placeholder="Observación"
-              value={prod.obs}
-              onChange={e => {
-                const obs = e.target.value;
-                setProductos(ps => ps.map(p => p.id === prod.id ? { ...p, obs } : p));
-              }}
-              className={styles.observacion}
-            />
-            <button onClick={() => onAdd(prod, prod.obs || "")}>Agregar</button>
+
+
+            {prod.pro_estadoV !== "N" ? (
+              <>
+                <input
+                  type="text"
+                  placeholder="Observación"
+                  value={prod.obs}
+                  onChange={e => {
+                    const obs = e.target.value;
+                    if (obs.length > 98) return;
+                    setProductos(ps => ps.map(p => p.id === prod.id ? { ...p, obs } : p));
+                  }}
+                  className={styles.observacion}
+                />
+                <button
+                  onClick={() => {
+                    onAdd(prod, prod.obs || "");
+                    setProductos(ps => ps.map(p => p.id === prod.id ? { ...p, obs: "" } : p));
+                  }}
+                >
+                  Agregar
+                </button>
+              </>
+            ) : (
+              <button disabled className={styles.disabledButton}>
+                Producto no disponible
+              </button>
+            )}
           </div>
         ))}
       </div>

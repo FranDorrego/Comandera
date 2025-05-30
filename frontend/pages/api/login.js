@@ -13,7 +13,7 @@ export default async function handler(req, res) {
 
   const url = process.env.link_base || "http://localhost:3001";
 
-  const query = `SELECT * FROM meseros WHERE me_des = '${idMesero}' AND me_cod = '${clave}'`;
+  const query = `SELECT * FROM meseros WHERE me_cod = '${idMesero}' AND me_ide = '${clave}'`;
 
   try {
     console.log(`${url}/api/meseros`, query)

@@ -10,7 +10,7 @@ export default async function handler(req, res) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: "SELECT TOP 50 * FROM mesas WHERE mes_tip='M' ORDER BY VAL(mes_cod)",
+        query: "SELECT TOP 100 * FROM mesas WHERE mes_tip='M' ORDER BY VAL(mes_cod)",
       }),
     });
     const mesasData = await mesasRes.json();
