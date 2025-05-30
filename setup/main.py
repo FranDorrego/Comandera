@@ -19,7 +19,7 @@ BASE_DIR = None
 class InstaladorApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Instalador de Sistema de Comandera")
+        self.root.title("Sistema de Comandera")
         self.base_path = tk.StringVar()
 
         self._crear_interfaz()
@@ -172,7 +172,8 @@ class InstaladorApp:
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
-            encoding="utf-8"
+            encoding="utf-8",
+            creationflags=subprocess.CREATE_NO_WINDOW
         )
 
         def leer_backend():
@@ -217,7 +218,8 @@ class InstaladorApp:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
-                encoding="utf-8"
+                encoding="utf-8",
+                creationflags=subprocess.CREATE_NO_WINDOW
             )
 
             for linea in proceso_build.stdout:
@@ -233,7 +235,8 @@ class InstaladorApp:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
-                encoding="utf-8"
+                encoding="utf-8",
+                creationflags=subprocess.CREATE_NO_WINDOW
             )
 
             for linea in self.proc_front.stdout:

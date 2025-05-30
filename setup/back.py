@@ -24,7 +24,7 @@ def ejecutar_instalacion_backend(ruta_mdb, log, log_general):
         else:
             log_general("✅ Python ya estaba instalado.")
 
-        python_exe = os.path.join(PYTHON_DIR, "python.exe")
+        python_exe = os.path.abspath(os.path.join(PYTHON_DIR, "python.exe"))
 
         if not os.path.exists(VENV_DIR):
             log_general("⚙️ Creando entorno virtual en HostBase...")

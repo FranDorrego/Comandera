@@ -47,11 +47,15 @@ def clonar_o_actualizar_repo():
 
 
 def ejecutar_setup():
-    path_setup = os.path.join(CARPETA_REPO, NOMBRE_SETUP)
+    ruta_absoluta = os.path.abspath(CARPETA_REPO)
+    path_setup = os.path.join(ruta_absoluta, NOMBRE_SETUP)
+
     if os.path.exists(path_setup):
-        subprocess.Popen([path_setup], shell=True)
+        print("▶ Ejecutando setup.exe...")
+        subprocess.Popen([path_setup], cwd=ruta_absoluta, shell=True)
     else:
-        print("❌ No se encontró setup.exe")
+        print("❌ No se encontró setup.exe en", path_setup)
+
 
 def crear_inicio_automatico():
     startup_dir = os.path.join(os.getenv("APPDATA"), "Microsoft\\Windows\\Start Menu\\Programs\\Startup")
@@ -96,14 +100,14 @@ def main():
     print("📁 Verificando carpeta Comandera...")
     clonar_o_actualizar_repo()
 
-    print("▶ Ejecutando instalador setup.exe...")
-    ejecutar_setup()
-
     print("🧷 Agregando a inicio automático...")
     crear_inicio_automatico()
 
     print("📌 Anclando a barra de tareas...")
     anclar_barra_tareas()
+
+    print("▶ Ejecutando instalador setup.exe...")
+    ejecutar_setup()
 
     print("✅ Todo listo.")
 
