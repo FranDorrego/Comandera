@@ -6,23 +6,23 @@ Este proyecto está compuesto por un frontend en Next.js y un backend en Python 
 
 ## ✅ Requisitos Generales del Sistema
 
-🔸📦 Tener instalado **Node.js** para el frontend.
+🔸📦 Tener instalado **Node.js** (el sistema lo descarga e instala globalmente si no está presente o si la versión es antigua).
 
-🔸🐍 Tener instalado **Python 32 bits** para el backend (necesario para conectarse a Access).
+🔸🐍 Tener instalado **Python 32 bits** (el sistema lo descarga e instala globalmente si no está presente).
 
 🔸📁 Tener una base de datos Access válida (`sifare.mdb`) ubicada en la carpeta del backend (`HostBase/`).
 
 🔸🧩 Tener `Microsoft.Jet.OLEDB.4.0` habilitado (solo funciona con Python de 32 bits).
 
-🔸🛠️ Tener creada una carpeta `venv32/` con entorno virtual de Python dentro de `HostBase`.
+🔸🛠️ Tener creada una carpeta `venv32/` con entorno virtual de Python dentro de `HostBase` (el sistema la crea automáticamente si no existe).
 
 🔸⚙️ Tener los archivos `run_front.bat` y `run_back.bat` para ejecución rápida.
 
 ---
 
-## 🛠️ Instalador Automático – Sistema de Comandera (Versión .EXE)
+## 🛠️ Sistema de Auto Configuración – Sistema de Comandera
 
-Este instalador permite que el cliente ejecute y actualice automáticamente todo el sistema de Comandera con solo hacer doble clic en un `.exe`, sin requerir conocimientos técnicos.
+El archivo `main.exe` permite ejecutar y actualizar automáticamente todo el sistema de Comandera con solo hacer doble clic, sin requerir conocimientos técnicos. Ya no se utiliza un instalador externo.
 
 ---
 
@@ -30,41 +30,37 @@ Este instalador permite que el cliente ejecute y actualice automáticamente todo
 
 ```
 📦 Comandera/
-├── Comandera.exe            ← Ejecutable de auto-actualización
-├── main.exe                 ← Instalador interno con interfaz Tkinter
+├── main.exe                 ← Lanzador principal con interfaz Tkinter
 ├── HostBase/                ← Backend en Python + base Access
 ├── frontend/                ← Proyecto Next.js
-├── Node.js/                 ← Node.js portable con npm.cmd
-├── Python32/                ← Python 32-bits portable
 ├── setup/config.json        ← Ruta seleccionada por el usuario
-└── Instalador/
-    ├── Comandera.py         ← Código fuente auto-actualizador
-    └── Comandera.exe        ← Copia del auto-actualizador
 ```
 
 ---
 
-## 🚦 Flujo de Ejecución del Instalador
+## 🚦 Flujo de Ejecución del Sistema
 
-🔹 Primera ejecución de `Comandera.exe`:
+🔹 Ejecución de `main.exe`:
 
-* Solicita permisos de administrador.
-* Verifica si existe la carpeta `Comandera/`.
-* Si no existe:
+* Verifica si existen Python y Node.js:
 
-  * Clona el repositorio desde GitHub.
-  * Ejecuta `main.exe` dentro del repositorio.
+  * Si no existen, los descarga desde los sitios oficiales e inicia sus instaladores globales.
+  * Si existen pero son versiones viejas, también se reinstalan.
+  * El usuario debe completar la instalación visual.
 
-🔹 Si la carpeta ya existe:
+* Luego:
 
-* Entra en la carpeta.
-* Ejecuta el nuevo instalador `main.exe` con flag para **no volver a clonar**.
+  * Crea entorno virtual si no existe.
+  * Instala dependencias Python (`pip install`).
+  * Instala dependencias Node (`npm install`).
+  * Compila frontend (`npm run build`).
+  * Lanza frontend y backend como hilos daemon.
 
 ---
 
 ## 🐍 Python (32 bits) – Instalación y Uso
 
-* Se descarga automáticamente desde python.org si no está instalado en `Python32/`.
+* Se descarga automáticamente desde python.org si no está presente.
 * Instalación visual, el usuario debe completarla.
 * Luego se usa para:
 
@@ -77,15 +73,15 @@ Este instalador permite que el cliente ejecute y actualice automáticamente todo
 
 ## 🌐 Node.js – Instalación y Uso
 
-* Instala Node.js portable en `Node.js/` (v18.17.1).
-* Ejecuta:
+* Se descarga automáticamente desde nodejs.org si no está presente o si la versión es más antigua que la requerida.
+* Instalación visual, el usuario debe completarla.
+* Luego ejecuta:
 
   ```bash
   npm install
   npm run build
   npm run start
   ```
-* Salida mostrada en consola visual del `.exe`.
 
 🧠 Configuración Persistente: `setup/config.json`
 
@@ -97,7 +93,6 @@ Este instalador permite que el cliente ejecute y actualice automáticamente todo
 🔁 Auto-Actualización:
 
 * Ejecuta `git reset --hard` y actualiza repositorio.
-* Corre el `main.exe` más reciente.
 
 ---
 

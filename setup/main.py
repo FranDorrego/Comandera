@@ -10,11 +10,10 @@ import signal
 import time
 
 from back import ejecutar_instalacion_backend, PYTHON_EXE_INSTALLED
-from front import ejecutar_instalacion_frontend
+from front import ejecutar_instalacion_frontend, existe_node
 
 CONFIG_FILE = "setup/config.json"
 PYTHON_DIR = PYTHON_EXE_INSTALLED
-NODE_DIR = "Node.js"
 BASE_DIR = None
 
 
@@ -66,7 +65,7 @@ class InstaladorApp:
 
         # Detectar si la instalación ya fue hecha
         python_ok = os.path.exists(PYTHON_DIR)
-        node_ok = os.path.exists(NODE_DIR)
+        node_ok = existe_node()
 
         if not (python_ok and node_ok):
             # Mostrar consola de instalación (solo si es necesario)
@@ -125,7 +124,7 @@ class InstaladorApp:
     
     def _verificar_estado_instalacion(self):
         python_ok = os.path.exists(PYTHON_DIR)
-        node_ok = os.path.exists(NODE_DIR)
+        node_ok = existe_node()
         base_ok = os.path.exists(self.base_path.get())
 
         if not (python_ok and node_ok):
@@ -157,7 +156,6 @@ class InstaladorApp:
                 self._log_callback(self.log_back),
                 self._log_callback(self.log_general)
             )
-
             self._log(self.log_general, "Instalación del backend completada.")
             
             self._log(self.log_general, "Instalando frontend...")
@@ -201,10 +199,11 @@ class InstaladorApp:
             self._kill_port(3000)
             self._log(self.log_front, "🏗️ Compilando frontend (next build)...")
 
-            npm_cmd = os.path.abspath(os.path.join("Node.js", "node-v18.17.1-win-x86", "npm.cmd"))
-            if not os.path.exists(npm_cmd):
-                self._log(self.log_front, "❌ No se encontró npm.cmd. ¿Está correctamente instalado Node.js?")
-                return
+            npm_cmd = shutil.which("npm")
+            if not npm_cmd:
+                print("❌ No se encontró Node.js (npm). ¿Está instalado correctamente?")
+            else:
+                print(f"✅ npm encontrado en: {npm_cmd}")
 
             # 0. Instalar dependencias
             self._log(self.log_front, "📦 Instalando dependencias (npm install)...")
@@ -283,9 +282,11 @@ class InstaladorApp:
 
     def _cerrar_aplicacion(self):
         self.CORRER = False
-        self.root.destroy()
+        self._kill_port(3001)
+        self._kill_port(3000)
         self._stop_backend()
         self._stop_frontend()
+        self.root.destroy()
 
     def _log(self, consola, texto):
         try:
@@ -297,17 +298,29 @@ class InstaladorApp:
     def _log_callback(self, consola):
         return lambda texto: self._log(consola, texto)
 
+    import subprocess
+
     def _kill_port(self, puerto=3000):
         try:
-            # Verificamos si hay algo usando el puerto 3000
-            output = subprocess.check_output(f'netstat -ano | findstr :{puerto}', shell=True, text=True)
+            # Verificamos si hay algo usando el puerto (sin abrir ventana)
+            output = subprocess.check_output(
+                f'netstat -ano | findstr :{puerto}',
+                shell=True,
+                text=True,
+                creationflags=subprocess.CREATE_NO_WINDOW
+            )
             lines = output.strip().split('\n')
 
             procesos_terminados = 0
             for line in lines:
                 if 'LISTENING' in line or 'ESTABLISHED' in line:
                     pid = line.strip().split()[-1]
-                    subprocess.run(["taskkill", "/PID", pid, "/F"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    subprocess.run(
+                        ["taskkill", "/PID", pid, "/F"],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                        creationflags=subprocess.CREATE_NO_WINDOW
+                    )
                     procesos_terminados += 1
 
             if procesos_terminados > 0:
@@ -316,10 +329,10 @@ class InstaladorApp:
                 self._log(self.log_front, f"ℹ️ Puerto {puerto} estaba libre.")
 
         except subprocess.CalledProcessError:
-            # findstr no encontró nada: el puerto está libre
             self._log(self.log_front, f"ℹ️ Puerto {puerto} está libre. No se realizaron acciones.")
         except Exception as e:
             self._log(self.log_front, f"❌ Error al intentar liberar el puerto {puerto}: {e}")
+
 
 
 
