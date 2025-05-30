@@ -6,7 +6,7 @@ import shutil
 
 PYTHON_URL = "https://www.python.org/ftp/python/3.10.9/python-3.10.9-embed-win32.zip"
 PYTHON_DIR = "Python32"
-VENV_DIR = os.path.join("HostBase", "venv32")
+VENV_DIR = os.path.abspath(os.path.join("HostBase", "venv32"))
 REQUIREMENTS = os.path.join("HostBase", "requirements.txt")
 
 
