@@ -189,3 +189,6 @@ curl -X POST http://localhost:3000/api/meseros \
 ---
 
 Con esta estructura clara y modular, podés ejecutar y mantener fácilmente el sistema de comandera completo tanto en frontend como backend. 🚀🧩🍽️
+
+--- 
+Sistema creado por Franco Dorrego en nombre de ArduMaker para el cliente Sifare. Por dudas o consultas, comunicarse a francodorrego@gmail.com

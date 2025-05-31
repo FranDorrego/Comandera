@@ -287,3 +287,7 @@ Esta estructura de endpoints permite manejar toda la lógica de login, visualiza
 ---
 ---
 ---
+
+--- 
+
+Sistema creado por Franco Dorrego en nombre de ArduMaker para el cliente Sifare. Por dudas o consultas, comunicarse a francodorrego@gmail.com

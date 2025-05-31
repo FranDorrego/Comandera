@@ -8,7 +8,7 @@ import subprocess
 import shutil
 import signal
 import time
-
+import base64
 from back import ejecutar_instalacion_backend, VENV_PATH
 from front import ejecutar_instalacion_frontend, existe_node
 
@@ -41,6 +41,7 @@ class InstaladorApp:
 
 
     def _crear_interfaz(self):
+        print(base64.b64decode("U2lzdGVtYSBkZXNhcnJvbGFkbyBwb3IgRnJhbmNvIERvcnJlZ28gLSBBcmR1TWFrZXIgMjAyNQ==").decode())
         frame_path = tk.Frame(self.root)
         frame_path.pack(padx=10, pady=10, fill="x")
 
@@ -351,10 +352,6 @@ class InstaladorApp:
         except Exception as e:
             self._log(cmd, f"❌ Error al intentar liberar el puerto {puerto}: {e}")
 
-
-import base64
-mensaje = base64.b64decode("U2lzdGVtYSBkZXNhcnJvbGFkbyBwb3IgRnJhbmNvIERvcnJlZ28gLSBBcmR1TWFrZXIgMjAyNQ==").decode()
-print(mensaje)
 
 if __name__ == "__main__":
     root = tk.Tk()

@@ -154,3 +154,7 @@ Body:
 ---
 
 Hecho para trabajar con sistemas simples, rápidos y sin dependencias pesadas. ✨
+
+--- 
+
+Sistema creado por Franco Dorrego en nombre de ArduMaker para el cliente Sifare. Por dudas o consultas, comunicarse a francodorrego@gmail.com

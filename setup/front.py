@@ -39,14 +39,16 @@ def instalar_node_msi(log):
 def ejecutar_instalacion_frontend(log, log_general):
     try:
         version_actual = obtener_version_node()
-
         if not version_actual or version_actual < NODE_VERSION_OBJETIVO:
             log_general(f"⚠️ Node.js no encontrado o versión desactualizada ({version_actual}). Instalando...")
             instalar_node_msi(log_general)
-            return  # Se detiene para que el usuario instale Node.js primero
-
+  
+        version_actual = obtener_version_node()
+        if not version_actual or version_actual < NODE_VERSION_OBJETIVO:
+            log_general("❌ Node.js no instalado o versión insuficiente. Instalación cancelada.")
+            return False
+        
         log_general(f"✅ Node.js detectado. Versión actual: {version_actual}")
-
         return True
     except Exception as e:
         log_general(f"❌ Error durante instalación del frontend: {e}", f"npm install cwd= {os.path.abspath(FRONTEND_DIR)}")
