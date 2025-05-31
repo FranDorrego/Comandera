@@ -58,7 +58,7 @@ Si la instalación automática falla, podés hacer lo siguiente:
 
 ```bash
 cd HostBase
-"C:\Ruta\a\python.exe" -m venv venv32
+"C:......python_32_bits.exe" -m venv venv32
 venv32\Scripts\pip install -r requirements.txt
 ```
 
