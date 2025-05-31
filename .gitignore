@@ -45,3 +45,6 @@ venv32/
 Python32
 Node.js
 *.mdb
+
+*.pfx
+sing.bat
