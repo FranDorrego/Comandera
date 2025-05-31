@@ -210,20 +210,24 @@ class InstaladorApp:
 
     def _start_frontend(self):
         def tarea_frontend():
+            import sys
+            frontend_dir = os.path.join(os.path.dirname(os.path.abspath(sys.executable)), "frontend")
+
             self._kill_port(3000)
             self._log(self.log_front, "🏗️ Compilando frontend (next build)...")
 
             npm_cmd = shutil.which("npm")
             if not npm_cmd:
-                print("❌ No se encontró Node.js (npm). ¿Está instalado correctamente?")
+                self._log(self.log_front, "❌ No se encontró Node.js (npm). ¿Está instalado correctamente?, si no, por favor instálalo manualmente y reinicia la PC.")
+                return
             else:
-                print(f"✅ npm encontrado en: {npm_cmd}")
+                self._log(self.log_front, f"✅ npm encontrado en: {npm_cmd}")
 
             # 0. Instalar dependencias
             self._log(self.log_front, "📦 Instalando dependencias (npm install)...")
             proceso_install = subprocess.Popen(
                 [npm_cmd, "install"],
-                cwd="frontend",
+                cwd=frontend_dir,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
@@ -240,7 +244,7 @@ class InstaladorApp:
             # 1. Compilar
             proceso_build = subprocess.Popen(
                 [npm_cmd, "run", "build"],
-                cwd="frontend",
+                cwd=frontend_dir,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
@@ -257,7 +261,7 @@ class InstaladorApp:
             # 2. Iniciar servidor de producción
             self.proc_front = subprocess.Popen(
                 [npm_cmd, "run", "start"],
-                cwd="frontend",
+                cwd=frontend_dir,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
@@ -269,7 +273,7 @@ class InstaladorApp:
                 for linea in self.proc_front.stdout:
                     self._log(self.log_front, f"[serve] {linea.strip()}")
             except Exception as e:
-                print(f"Error al leer salida del servidor frontend: {e}")
+                self._log(self.log_front,f"Error al leer salida del servidor frontend: {e}")
 
         # Lanzar todo en hilo aparte
         self.btn_start_front.config(state="disabled")
@@ -312,9 +316,9 @@ class InstaladorApp:
     def _log_callback(self, consola):
         return lambda texto: self._log(consola, texto)
 
-    import subprocess
-
     def _kill_port(self, puerto=3000):
+
+        cmd = self.log_front if puerto == 3000 else self.log_back
         try:
             # Verificamos si hay algo usando el puerto (sin abrir ventana)
             output = subprocess.check_output(
@@ -338,14 +342,14 @@ class InstaladorApp:
                     procesos_terminados += 1
 
             if procesos_terminados > 0:
-                self._log(self.log_front, f"✅ Puerto {puerto} liberado. Procesos finalizados: {procesos_terminados}")
+                self._log(cmd, f"✅ Puerto {puerto} liberado. Procesos finalizados: {procesos_terminados}")
             else:
-                self._log(self.log_front, f"ℹ️ Puerto {puerto} estaba libre.")
+                self._log(cmd, f"ℹ️ Puerto {puerto} estaba libre.")
 
         except subprocess.CalledProcessError:
-            self._log(self.log_front, f"ℹ️ Puerto {puerto} está libre. No se realizaron acciones.")
+            self._log(cmd, f"ℹ️ Puerto {puerto} está libre. No se realizaron acciones.")
         except Exception as e:
-            self._log(self.log_front, f"❌ Error al intentar liberar el puerto {puerto}: {e}")
+            self._log(cmd, f"❌ Error al intentar liberar el puerto {puerto}: {e}")
 
 
 import base64
