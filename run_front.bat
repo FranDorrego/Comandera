@@ -9,14 +9,9 @@ call npm install
 
 echo.
 echo ====================================
-echo Compilando proyecto...
-echo ====================================
-call npm run build
-
-echo.
-echo ====================================
 echo Iniciando servidor en http://localhost:3000 ...
 echo ====================================
-call npm start
+call npm run dev
+
 
 pause

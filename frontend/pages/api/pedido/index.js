@@ -1,7 +1,5 @@
-import crypto from "crypto";
 
 // Este endpoint recibe un pedido y lo guarda en la base de datos
-// Si hay un error, hace rollback de los cambios
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -20,15 +18,51 @@ export default async function handler(req, res) {
     meseroId = mesero.me_cod;
   }
 
-  const now = new Date();
-  const fecha = now.toISOString().slice(0, 10).replace(/-/g, "/");
-  const hora = now.toTimeString().slice(0, 5);
-  const batchId = crypto.randomUUID().slice(0, 3); // pequeño identificador para rollback
+  try {
+    // 🔍 Paso 1: Obtener configuración de la tabla `control`
+    // Se obtiene la fecha (`con_fec`) y los flags de impresión (`imp_cpb`)
+    const controlRes = await fetch(`${url}/api/control`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: "SELECT TOP 1 con_fec, imp_cpb FROM control ORDER BY con_fec DESC"
+      }),
+    });
 
-  const queries = [];
+    const controlData = await controlRes.json();
 
-  for (const item of items) {
-    const query = `
+    // 🛑 Si no se obtiene un resultado válido, usar valores por defecto
+    if (!controlData?.res?.[0]) {
+      console.error("⚠ No se pudo obtener configuración de control:", controlData);
+      controlData.res = [{
+        con_fec: new Date().toISOString().slice(0, 10),
+        imp_cpb: "000"
+      }];
+    }
+
+    // 📅 Extraer fecha y hora del sistema o desde la tabla
+    const { con_fec, imp_cpb } = controlData.res[0];
+    const fecha = con_fec;
+    const hora = new Date().toTimeString().slice(0, 5);
+
+    // ⚙️ Paso 2: Determinar qué sectores deben imprimir (cocina, parrilla, bar)
+    // Se interpreta el string binario imp_cpb (por ejemplo, "010")
+    const imp_cpb_str = imp_cpb.toString().padStart(3, "0").toLowerCase();
+    const impcocina = imp_cpb_str[0] === "0" ? 1 : 0;
+    const impparrilla = imp_cpb_str[1] === "0" ? 1 : 0;
+    const impbar = imp_cpb_str[2] === "0" ? 1 : 0;
+
+    // 🧾 Paso 3: Insertar cada producto pedido en la tabla `cocina`
+    for (const item of items) {
+      // 🗒️ Formatear la observación del producto (escapando comillas si es necesario)
+      const obsText = (item.obs || " ").replace(/'/g, "''");
+      const observacion = `'${obsText}'`;
+
+      // 💰 Calcular precio unitario
+      const totalUnitario = item.total / item.cantidad || 0;
+
+      // 🧱 Construir query de inserción SQL
+      const query = `
       INSERT INTO cocina (
         coc_mes, coc_pro, coc_can, coc_val, coc_obs,
         coc_est, coc_est1, coc_ela, coc_fac, coc_fac1,
@@ -37,45 +71,35 @@ export default async function handler(req, res) {
         cli_id, men_cod, descuento
       )
       VALUES (
-        '${mesa}', '${item.id}', ${item.cantidad}, ${item.total / item.cantidad || 0},
-        ${item.observacion ? `'${item.observacion}'` : 'null'},
+        '${mesa}', '${item.id}', ${item.cantidad}, ${totalUnitario}, ${observacion},
         '0', '0', '0', '0', '0',
         '${meseroId}', '${fecha}', '${hora}', '1', 0,
-        '${batchId}', '0', '0', '1', '1', '1',
+        '${meseroId}', '0', '0', ${impcocina}, ${impbar}, ${impparrilla},
         0, null, null
       )
     `;
-    queries.push(query);
-  }
 
-  try {
-    for (const query of queries) {
+      // 🚀 Ejecutar inserción en la base de datos
       const response = await fetch(`${url}/api/cocina`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query }),
       });
 
+      // 🧯 Verificar si hubo error al insertar
       if (!response.ok) {
         const error = await response.json();
         console.error("❌ Error al insertar pedido:", error);
-
-        // 🔁 Rollback
-        const rollbackQuery = `DELETE FROM cocina WHERE coc_car = '${batchId}' AND coc_fec = '${fecha}' AND coc_hor = '${hora}'`;
-        await fetch(`${url}/api/cocina`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: rollbackQuery }),
-        });
-
-        return res.status(500).json({ error: "Error al guardar en cocina. Se deshicieron los cambios." });
+        return res.status(500).json({ error: "Error al guardar pedido." });
       }
     }
 
+    // ✅ Todo insertado correctamente
     return res.status(200).json({ status: "ok", cantidad: items.length });
 
   } catch (err) {
+    // 🛑 Error inesperado
     console.error("❌ Error inesperado:", err);
-    return res.status(500).json({ error: "Error inesperado al guardar en cocina" });
+    return res.status(500).json({ error: "Error inesperado al guardar pedido" });
   }
 }

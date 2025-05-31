@@ -76,7 +76,7 @@ export default function SearchAndList({ onAdd, mesero, mesa }) {
                   value={prod.obs}
                   onChange={e => {
                     const obs = e.target.value;
-                    if (obs.length > 98) return;
+                    if (obs.length > 90) return;
                     setProductos(ps => ps.map(p => p.id === prod.id ? { ...p, obs } : p));
                   }}
                   className={styles.observacion}

@@ -65,7 +65,7 @@ export default function Pedido() {
       id: i.producto.id,
       nombre: i.producto.nombre,
       cantidad: i.cantidad,
-      observacion: i.observacion,
+      obs: i.obs,
       total: i.cantidad * i.producto.precio,
     }));
     const pedido = { mesa, mesero: { ...mesero_actual }, items, total: items.reduce((s, i) => s + i.total, 0) };
