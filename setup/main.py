@@ -73,7 +73,7 @@ class InstaladorApp:
         self.frame_logs.pack(padx=10, pady=10, fill="both", expand=True)
 
         # Detectar si la instalación ya fue hecha
-        python_ok = os.path.exists(VENV_PATH)
+        python_ok = os.path.exists(r"HostBase\venv32\Scripts\python.exe")
         node_ok = existe_node()
 
         if not (python_ok and node_ok):
@@ -132,7 +132,7 @@ class InstaladorApp:
                 BASE_DIR = os.path.dirname(self.base_path.get()) if self.base_path.get() else None
     
     def _verificar_estado_instalacion(self):
-        python_ok = os.path.exists(VENV_PATH)
+        python_ok = os.path.exists(r"HostBase\venv32\Scripts\python.exe")
         node_ok = existe_node()
         base_ok = os.path.exists(self.base_path.get())
 
@@ -189,7 +189,7 @@ class InstaladorApp:
         self._kill_port(3001)
 
         from back import VENV_PATH  # Importar BASE_DIR desde el módulo back
-        python_exe = os.path.abspath(os.path.join(f"{VENV_PATH}/Scripts/", "python.exe"))
+        python_exe = r"HostBase\venv32\Scripts\python.exe"
 
         self.proc_back = subprocess.Popen(
             [python_exe, "-m", "uvicorn", "api:app", "--port", "3001"],
@@ -212,7 +212,7 @@ class InstaladorApp:
     def _start_frontend(self):
         def tarea_frontend():
             import sys
-            frontend_dir = os.path.join(os.path.dirname(os.path.abspath(sys.executable)), "frontend")
+            frontend_dir = "frontend"
 
             self._kill_port(3000)
             self._log(self.log_front, "🏗️ Compilando frontend (next build)...")
