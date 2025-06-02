@@ -56,7 +56,7 @@ export default async function handler(req, res) {
     for (const item of items) {
       // 🗒️ Formatear la observación del producto (escapando comillas si es necesario)
       const obsText = (item.obs || " ").replace(/'/g, "''");
-      const observacion = `'${obsText}'`;
+      const observacion = `W '${obsText}'`;
 
       // 💰 Calcular precio unitario
       const totalUnitario = item.total / item.cantidad || 0;
@@ -71,7 +71,7 @@ export default async function handler(req, res) {
         cli_id, men_cod, descuento
       )
       VALUES (
-        '${mesa}', '${item.id}', ${item.cantidad}, ${totalUnitario}, ${observacion},
+        '${mesa}', '${item.id}', ${item.cantidad}, ${item.total}, ${observacion},
         '0', '0', '0', '0', '0',
         '${meseroId}', '${fecha}', '${hora}', '1', 0,
         '${meseroId}', '0', '0', ${impcocina}, ${impbar}, ${impparrilla},
