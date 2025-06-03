@@ -55,29 +55,27 @@ export default async function handler(req, res) {
     // 🧾 Paso 3: Insertar cada producto pedido en la tabla `cocina`
     for (const item of items) {
       // 🗒️ Formatear la observación del producto (escapando comillas si es necesario)
-      const obsText = (item.obs || " ").replace(/'/g, "''");
-      const observacion = `W '${obsText}'`;
-
-      // 💰 Calcular precio unitario
-      const totalUnitario = item.total / item.cantidad || 0;
+      const observacion = `W ${item.obs ? item.obs : ""}`;
 
       // 🧱 Construir query de inserción SQL
+      const coc_con = Math.floor(Math.random() * 900000) + 100000; // ejemplo simple
+
       const query = `
-      INSERT INTO cocina (
-        coc_mes, coc_pro, coc_can, coc_val, coc_obs,
-        coc_est, coc_est1, coc_ela, coc_fac, coc_fac1,
-        coc_mese, coc_fec, coc_hor, coc_per, coc_cos,
-        coc_car, coc_div, coc_prep, impcocina, impbar, impparrilla,
-        cli_id, men_cod, descuento
-      )
-      VALUES (
-        '${mesa}', '${item.id}', ${item.cantidad}, ${item.total}, ${observacion},
-        '0', '0', '0', '0', '0',
-        '${meseroId}', '${fecha}', '${hora}', '1', 0,
-        '${meseroId}', '0', '0', ${impcocina}, ${impbar}, ${impparrilla},
-        0, null, null
-      )
-    `;
+        INSERT INTO cocina (
+          coc_con, coc_mes, coc_pro, coc_can, coc_val, coc_obs,
+          coc_est, coc_est1, coc_ela, coc_fac, coc_fac1,
+          coc_mese, coc_fec, coc_hor, coc_per, coc_cos,
+          coc_car, coc_div, coc_prep, impcocina, impbar, impparrilla,
+          cli_id, men_cod, descuento
+        )
+        VALUES (
+          '${coc_con}', '${mesa}', '${item.id}', ${item.cantidad}, ${item.total}, '${observacion}',
+          '0', '0', '0', '0', '0',
+          '${meseroId}', '${fecha}', '${hora}', '1', 0,
+          '${meseroId}', '0', '0', ${impcocina}, ${impbar}, ${impparrilla},
+          0, null, null
+        )
+      `;
 
       // 🚀 Ejecutar inserción en la base de datos
       const response = await fetch(`${url}/api/cocina`, {
